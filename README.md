@@ -108,7 +108,7 @@ GET /user/{userID}
 ## Suppression d'un utilisateur
 ### Request
 ```json
-DELETE /user/{userID}
+POST /user/delete/{userID}
 ```
 ### Response
 ```json
@@ -116,3 +116,125 @@ DELETE /user/{userID}
 404 User not found
 401 Unauthorized
 ```
+
+
+# PLANTES
+## Ajout d'une plante
+### Request
+```json
+POST /plant/add
+```
+### Body
+```json
+{
+  "plante": {
+    "name": str,
+    "latitude": float,
+    "longitude": float
+  },
+  "token": {
+    "accessToken": str
+  }
+}
+```
+### Response
+```json
+201 Created
+{
+    "plantID": int
+}
+
+401 Unauthorized
+404 User not found
+```
+
+## Récupération de toute les plantes
+### Request
+```json
+GET /plante/search
+```
+### Response
+```json
+200 OK
+{
+    "searchSetting":{
+        "availablePlante": bool,        // Si la plante est disponible
+        "keptPlante": bool,             // Si la plante est gardée
+        "donePlante": bool,             // Si la plante est terminée
+        "ownerID": int,                 // ID du propriétaire (-1 = tous)
+        "guardianID": int,              // ID du gardien (-1 = tous)
+        "latitude": float,              // Latitude du centre de la zone de recherche (-1 = tous)
+        "longitude": float,             // Longitude du centre de la zone de recherche (-1 = tous)
+        "radius": float                 // Rayon de la zone de recherche (-1 = tous)
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+200 OK
+[
+    {
+        "id": int,
+        "ownerID": int,
+        "guardianID": int,
+        "name": str,
+        "latitude": float,
+        "longitude": float,
+        "planteStatus": int {0=Disponible, 1=Gardée, 2=Terminée},
+        "createdAt": datetime
+    },
+    ...
+]
+
+401 Unauthorized
+```
+
+## Récupération des données d'une plante
+### Request
+```json
+GET /plante/{plantID}
+```
+### Body
+```json
+{
+    "accessToken": str
+}
+```
+### Response
+```json
+200 OK
+{
+    "id": int,
+    "ownerID": int,
+    "guardianID": int,
+    "name": str,
+    "latitude": float,
+    "longitude": float,
+    "planteStatus": int {0=Disponible, 1=Gardée, 2=Terminée},
+    "createdAt": datetime
+}
+```
+
+## Supprimer une plante
+### Request
+```json
+POST /plante/delete/{plantID}
+```
+### Body
+```json
+{
+    "accessToken": str
+}
+```
+### Response
+```json
+200 OK
+
+401 Unauthorized (not owner or admin)
+404 Plant not found
+```
+
+## Mettre à jours le gardien d'une plante

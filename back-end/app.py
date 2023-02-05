@@ -51,6 +51,10 @@ def RefreshToken(token: Token):
         return Response(status_code=401)
     if(db.TokenGetByRefreshToken(token.refreshToken) == None):
         return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
     token: Token = db.TokenRefresh(db.TokenGetByRefreshToken(token.refreshToken))
     return token
     
@@ -77,6 +81,10 @@ def GetUser(userID: int, token: Token):
         return Response(status_code=401)
     if(db.TokenGetByAccessToken(token.accessToken) == None):
         return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
     user: User = db.UserGetByID(userID)
     if(user == None):
         return Response(status_code=404)
@@ -98,6 +106,7 @@ def DeleteUser(userID: int, token: Token):
     token: Token = db.TokenGetByAccessToken(token.accessToken)
     if(token == None):                                              # Si l'accessToken n'existe pas
         return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
@@ -111,6 +120,109 @@ def DeleteUser(userID: int, token: Token):
     db.UserDelete(user)
     return Response(status_code=200)
 ################
+
+
+
+##### PLANTE #####
+@app.post("/plante/add")
+def AddPlante(plante: Plante, token: Token):
+    """
+    Ajoute une plante à la base de données
+    :param plante: Plante à ajouter
+    :return: 201 si ajouté
+    :return: 401 si mauvais accessToken (ou introuvable)
+    :return: 404 si l'utilisateur n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    requestUser: User = db.UserGetByID(token.userID) # Utilisateur qui fait la requête
+    if(requestUser == None):                                        # Si l'utilisateur n'existe pas
+        return Response(status_code=404)
+
+    plante.owner = requestUser
+    planteID: int = db.PlanteAdd(plante)
+
+    returnData: dict = {"planteID": planteID}
+    return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
+
+@app.post("/plante/search/", response_model=list[Plante])
+def GetPlanteAll(searchSetting: SearchSettings, token: Token):
+    """
+    Renvoie toutes les plantes
+    :return: 200 si connecté, liste de plantes
+    :return: 401 si mauvais accessToken (ou introuvable)
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    print("ok")
+    plantes: list[Plante] = db.PlanteSearchAll(searchSetting)
+    return plantes
+
+@app.post("/plante/{planteID}", response_model=Plante)
+def GetPlanteByID(planteID: int, token: Token):
+    """
+    Renvoie une plante
+    :param planteID: ID de la plante à renvoyer
+    :return: 200 si connecté, plante
+    :return: 401 si mauvais accessToken (ou introuvable)
+    :return: 404 si la plante n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    plante: Plante = db.PlanteGetByID(planteID)
+    if(plante == None):                                             # Si la plante n'existe pas
+        return Response(status_code=404)
+    return plante
+
+@app.post("/plante/delete/{planteID}")
+def DeletePlante(planteID: int, token: Token):
+    """
+    Supprime une plante
+    :param planteID: ID de la plante à supprimer
+    :return: 200 si connecté et administrateur
+    :return: 401 si mauvais accessToken (ou introuvable) ou si l'utilisateur n'est pas administrateur
+    :return: 404 si la plante n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token == None):                                              # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    plante: Plante = db.PlanteGetByID(planteID)                     # Plante à supprimer
+    if(plante == None):                                             # Si la plante n'existe pas
+        return Response(status_code=404)
+
+    requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
+    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == plante.owner.id)):# Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur à supprimer
+        return Response(status_code=401)
+
+    db.PlanteDelete(plante)
+    return Response(status_code=200)
+
+##################
 
 
 

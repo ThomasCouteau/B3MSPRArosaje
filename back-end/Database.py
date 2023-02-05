@@ -43,33 +43,47 @@ class User:
 ###############
 
 
+##### SEARCH SETTINGS #####
+@dataclass
+class SearchSettings:
+    availablePlante: bool
+    keptPlante: bool
+    donePlante: bool
+    ownerID: int
+    guardianID: int
+    latitude: float
+    longitude: float
+    radius: int
+###########################
+
+
 ##### PLANTES #####
 @dataclass
 class PlanteStatus:
-    DEMANDE: int = 1
+    DISPONIBLE: int = 1
     GARDE: int = 2
-    RECUPERE: int = 3
+    FINI: int = 3
 
     def __to_string__(self, id: int) -> str:
         if id == 1:
-            return "Demandé"
+            return "Disponible"
         elif id == 2:
             return "Gardé"
         elif id == 3:
-            return "Recuperé"
+            return "Fini"
         else:
             return "Inconnu"
 
 @dataclass
 class Plante:
-    id: int
-    owner: User
-    guardian: User
-    name: str
-    status: PlanteStatus
-    latitude: float
-    longitude: float
-    creationDate: datetime.datetime
+    id: Union[int, None] = None
+    owner: Union[User,None] = None
+    guardian: Union[User, None] = None
+    name: Union[str,None] = None
+    status: Union[PlanteStatus,None] = None
+    latitude: Union[float,None] = None
+    longitude: Union[float,None] = None
+    creationDate: Union[datetime.datetime , None] = None
 ###################
 
 
@@ -230,3 +244,86 @@ class Database:
         self.db.execute("DELETE FROM Token WHERE userID = ?", [user.id])
         return
     #########
+
+    # PLANTE #
+    def PlanteGetByID(self, planteID: int) -> Plante:
+        """
+        Récupère une plante par son ID
+        :param planteID: ID de la plante
+        :return: Plante
+        """
+        plante = self.db.execute("SELECT * FROM plante WHERE planteID = ?", [planteID])
+        if len(plante) == 0:
+            return None
+        return Plante(plante[0][0], plante[0][1], plante[0][2], plante[0][3], plante[0][4], plante[0][5], plante[0][6], plante[0][7])
+
+    def PlanteAdd(self, newPlante: Plante) -> int:
+        """
+        Ajoute une plante à la base de données
+        :param newPlante: Plante à ajouter
+        :return: planteID
+        """
+        self.db.execute("INSERT INTO plante (ownerID, name, statusID, latitude, longitude) VALUES (?, ?, ?, ?, ?)", [newPlante.owner.id, newPlante.name, PlanteStatus.DISPONIBLE, newPlante.latitude, newPlante.longitude])
+        return self.db.execute("SELECT last_insert_rowid()")[0][0]
+    def PlanteSearchAll(self, searchSettings: SearchSettings) -> list[Plante]:
+        """
+        Récupère toutes les plantes de la base de données
+        :param searchSettings: Paramètres de recherche
+        :return: Liste de plantes
+        """
+        request: str = "SELECT * FROM plante WHERE "
+        requestData: list = []
+        if searchSettings.availablePlante:
+            request += "(statusID = ?"
+            requestData.append(PlanteStatus.DISPONIBLE)
+        if searchSettings.keptPlante:
+            if len(requestData) > 0:
+                request += " OR "
+                request += "statusID = ?"
+            else:
+                request += "(statusID = ?"
+            requestData.append(PlanteStatus.GARDE)
+        if searchSettings.donePlante:
+            if len(requestData) > 0:
+                request += " OR "
+                request += "statusID = ?"
+            else:
+                request += "(statusID = ?"
+            requestData.append(PlanteStatus.FINI)
+        if searchSettings.availablePlante or searchSettings.keptPlante or searchSettings.donePlante:
+            request += ")"
+
+        if searchSettings.ownerID != -1:
+            if len(requestData) > 0:
+                request += " AND "
+            request += "ownerID = ?"
+            requestData.append(searchSettings.guardianID)
+        if searchSettings.guardianID != -1:
+            if len(requestData) > 0:
+                request += " AND "
+            request += "guardianID = ?"
+            requestData.append(searchSettings.guardianID)
+        if searchSettings.latitude != -1 and searchSettings.longitude != -1 and searchSettings.radius != -1:
+            if len(requestData) > 0:
+                request += " AND "
+            request += "latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?"
+            requestData.append(searchSettings.latitude - searchSettings.radius)
+            requestData.append(searchSettings.latitude + searchSettings.radius)
+            requestData.append(searchSettings.longitude - searchSettings.radius)
+            requestData.append(searchSettings.longitude + searchSettings.radius)
+        request += " ORDER BY id DESC"
+        plantes = self.db.execute(request, requestData)
+        returnPlantes: list[Plante] = []
+        for plante in plantes:
+            returnPlantes.append(Plante(plante[0], plante[1], plante[2], plante[3], plante[4], plante[5], plante[6], datetime.datetime.strptime(plante[7], "%Y-%m-%d %H:%M:%S")))
+        print(returnPlantes)
+        return returnPlantes
+    def PlanteDelete(self, plante: Plante) -> None:
+        """
+        Supprime une plante
+        :param plante: Plante à supprimer
+        :return: None
+        """
+        self.db.execute("DELETE FROM plante WHERE planteID = ?", [plante.id])
+        return
+    ##########

@@ -396,3 +396,51 @@ POST /conversation/{conversationID}
 401 Unauthorized (not owner or guardian or admin)
 404 Conversation not found
 ```
+
+## Récupération du contenu d'un message
+### Request
+```json
+POST /conversation/message/{messageID}
+```
+### Body
+```json
+{
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+200 OK
+{
+    "id": int,
+    "conversation": {
+        "id": int,
+        "owner": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+        },
+        "guardian": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+        }
+    },
+    "sender": {
+        "id": int,
+        "userTypeID": int,
+        "pseudo": str,
+    },
+    "message": str,
+    "image": str (base64),
+    "date": datetime
+}
+
+401 Unauthorized (not owner or guardian or admin)
+404 Message not found
+```
+
+## Envoyer un message
+

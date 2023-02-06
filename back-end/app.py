@@ -323,6 +323,32 @@ def GetConversationMessagesID(conversationID: int, token: Token):
 
     messagesID: list[int] = db.MessageIDsGetByConversationID(conversationID)
     return messagesID
+@app.post("/conversation/GetMessage/{messageID}/", response_model=PrivateMessage)
+def GetConversationMessage(messageID: int, token: Token):
+    """
+    Récupère le contenu d'un message
+    :param messageID: ID du message
+    :return: 200 Si connecté, message récupéré
+    :return: 401 Si mauvais accessToken (ou introuvable), ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas dans la conversation
+    :return: 404 Si le message n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    message: PrivateMessage = db.MessageGetByID(messageID)
+    if not(message.conversation.owner.id == token.userID or message.conversation.guardian.id == token.userID):
+        return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
+
+    if(message == None):                                            # Si le message n'existe pas
+        return Response(status_code=404)
+
+    return message
+
 
 @app.post("/conversation/add/")
 def AddConversation(conversation: Conversation, token: Token):

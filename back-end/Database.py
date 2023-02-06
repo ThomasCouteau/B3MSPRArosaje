@@ -421,6 +421,22 @@ class Database:
         for message in messages:
             returnMessagesID.append(message[0])
         return returnMessagesID
+    def MessageGetByID(self, messageID: int) -> PrivateMessage:
+        """
+        Récupère un message par son ID
+        :param messageID: ID du message
+        :return: Message
+        """
+        message = self.db.execute("SELECT id, conversationID, senderID, message, picture, date FROM privateMessage WHERE id = ?", [messageID])
+        if len(message) == 0:
+            return None
+        message = message[0]
+        returnMessage: PrivateMessage = PrivateMessage(message[0], self.ConversationGetByID(message[1]), self.UserGetByID(message[2]), message[3], message[4])
+        returnMessage.sender.password = None
+        returnMessage.sender.token = None
+        returnMessage.sender.picture = None
+        returnMessage.sender.lastConnection = None
+        return returnMessage
 
     def ConversationAdd(self, newConversation: Conversation) -> int:
         """

@@ -334,3 +334,65 @@ POST /conversation/
     },
     ...
 ]
+
+401 Unauthorized
+```
+
+## Création d'une conversation
+### Request
+```json
+POST /conversation/add
+```
+### Body
+```json
+{
+    "conversation": {
+        "owner": {
+            "id": int
+        },
+        "guardian": {
+            "id": int
+        }
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+201 Created
+{
+    "conversationID": int
+}
+
+400 Bad request (owner and guardian are the same)
+401 Unauthorized
+404 User not found
+409 Conversation already exists
+```
+
+<!-- ## Récupération les IDs des messages d'une conversation
+### Request
+```json
+POST /conversation/{conversationID}
+```
+### Body
+```json
+{
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+200 OK
+[
+    int,
+    ...
+]
+
+401 Unauthorized
+404 Conversation not found
+``` -->

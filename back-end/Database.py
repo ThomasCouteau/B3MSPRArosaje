@@ -91,38 +91,38 @@ class Plante:
 ##### MESSAGERIE #####
 @dataclass
 class Conversation:
-    id: int
-    owner: User
-    guardian: User
+    id: Union[int, None] = None
+    owner: Union[User, None] = None
+    guardian: Union[User, None] = None
 
 @dataclass
 class PrivateMessage:
-    id: int
-    conversation: Conversation
-    sender: User
-    message: str
-    image: str
-    date: datetime.datetime
+    id: Union[int, None] = None
+    conversation: Union[Conversation, None] = None
+    sender: Union[User, None]  = None
+    message: Union[str, None] = None
+    image: Union[str, None] = None
+    date: Union[datetime.datetime, None]  = None
 ######################
 
 
 ##### FORUM #####
 @dataclass
 class Post:
-    id: int
-    author: User
-    plante: Plante
-    title: str
-    picture: str
-    date: datetime.datetime
+    id: Union[int, None] = None
+    author: Union[User, None] = None
+    plante: Union[Plante, None] = None
+    title: Union[str, None] = None
+    picture: Union[str, None] = None
+    date: Union[datetime.datetime, None] = None
 
 @dataclass
 class Comment:
-    id: int
-    post: Post
-    author: User
-    message: str
-    date: datetime.datetime
+    id: Union[int, None] = None
+    post: Union[Post, None] = None
+    author: Union[User, None] = None
+    message: Union[str, None] = None
+    date: Union[datetime.datetime, None] = None
 #################
 
 
@@ -385,4 +385,36 @@ class Database:
             returnConversation.guardian.picture = None
             returnConversation.guardian.lastConnection = None
         return returnConversation
+    def ConversationGetByUsersID(self, ownerID: int, guardianID: int) -> Conversation:
+        """
+        Récupère une conversation par les ID des utilisateurs
+        :param ownerID: ID du propriétaire
+        :param guardianID: ID du gardien
+        :return: Conversation ou None
+        """
+        conversation = self.db.execute("SELECT id, ownerID, guardianID FROM conversation WHERE ownerID = ? AND guardianID = ?", [ownerID, guardianID])
+        if len(conversation) == 0:
+            return None
+        conversation = conversation[0]
+        returnConversation: Conversation = Conversation(conversation[0], self.UserGetByID(conversation[1]) if conversation[1] != None else None, self.UserGetByID(conversation[2]) if conversation[2] != None else None)
+        if returnConversation.owner != None:
+            returnConversation.owner.password = None
+            returnConversation.owner.token = None
+            returnConversation.owner.picture = None
+            returnConversation.owner.lastConnection = None
+        if returnConversation.guardian != None:
+            returnConversation.guardian.password = None
+            returnConversation.guardian.token = None
+            returnConversation.guardian.picture = None
+            returnConversation.guardian.lastConnection = None
+        return returnConversation
+
+    def ConversationAdd(self, newConversation: Conversation) -> int:
+        """
+        Ajoute une conversation à la base de données
+        :param newConversation: Conversation à ajouter
+        :return: conversationID
+        """
+        self.db.execute("INSERT INTO conversation (ownerID, guardianID) VALUES (?, ?)", [newConversation.owner.id, newConversation.guardian.id])
+        return self.db.execute("SELECT last_insert_rowid()")[0][0]
     ################    

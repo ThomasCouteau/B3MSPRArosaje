@@ -298,6 +298,38 @@ def GetConversations(token: Token):
     conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
     return conversations
 
+@app.post("/conversation/add/")
+def AddConversation(conversation: Conversation, token: Token):
+    """
+    Ajoute une conversation
+    :param conversation: Conversation à ajouter
+    :return: 201 Si connecté, conversation ajoutée
+    :return: 400 Si mauvais paramètres (owner et guardian identiques)
+    :return: 401 Si mauvais accessToken (ou introuvable)
+    :return: 404 Si l'utilisateur n'existe pas
+    :return: 409 Si la conversation existe déjà
+    """
+    if(conversation.owner.id == conversation.guardian.id):          # Si l'utilisateur est son propre gardien
+        return Response(status_code=400)
+
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    if(db.UserGetByID(conversation.owner.id) == None or db.UserGetByID(conversation.guardian.id) == None):
+        return Response(status_code=404)
+
+    if(db.ConversationGetByUsersID(conversation.owner.id, conversation.guardian.id) != None):
+        return Response(status_code=409)
+
+    conversationID: int = db.ConversationAdd(conversation)
+    returnData: dict = {"conversationID": conversationID}
+    return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
+
 ########################
 
 if __name__ == '__main__':

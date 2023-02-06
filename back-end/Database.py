@@ -77,13 +77,14 @@ class PlanteStatus:
 @dataclass
 class Plante:
     id: Union[int, None] = None
-    owner: Union[User,None] = None
+    owner: Union[User, None] = None
     guardian: Union[User, None] = None
-    name: Union[str,None] = None
-    status: Union[PlanteStatus,None] = None
-    latitude: Union[float,None] = None
-    longitude: Union[float,None] = None
+    name: Union[str, None] = None
+    status: Union[PlanteStatus, int, None] = None
+    latitude: Union[float, None] = None
+    longitude: Union[float, None] = None
     creationDate: Union[datetime.datetime , None] = None
+    picture: Union[bytes , None] = None
 ###################
 
 
@@ -252,10 +253,22 @@ class Database:
         :param planteID: ID de la plante
         :return: Plante
         """
-        plante = self.db.execute("SELECT * FROM plante WHERE planteID = ?", [planteID])
+        plante = self.db.execute("SELECT id, ownerID, guardianID, name, statusID, latitude, longitude, creationDate, picture FROM plante WHERE id = ?", [planteID])
         if len(plante) == 0:
             return None
-        return Plante(plante[0][0], plante[0][1], plante[0][2], plante[0][3], plante[0][4], plante[0][5], plante[0][6], plante[0][7])
+        plante = plante[0]
+        returnPlantes: Plante = Plante(plante[0], self.UserGetByID(plante[1]) if plante[1] != None else None, self.UserGetByID(plante[2]) if plante[2] != None else None, plante[3], plante[4], plante[5], plante[6], datetime.datetime.strptime(plante[7], "%Y-%m-%d %H:%M:%S"), plante[8])
+        if returnPlantes.owner != None:
+            returnPlantes.owner.password = None
+            returnPlantes.owner.token = None
+            returnPlantes.owner.picture = None
+            returnPlantes.owner.lastConnection = None
+        if returnPlantes.guardian != None:
+            returnPlantes.guardian.password = None
+            returnPlantes.guardian.token = None
+            returnPlantes.guardian.picture = None
+            returnPlantes.guardian.lastConnection = None
+        return returnPlantes
 
     def PlanteAdd(self, newPlante: Plante) -> int:
         """
@@ -263,7 +276,7 @@ class Database:
         :param newPlante: Plante à ajouter
         :return: planteID
         """
-        self.db.execute("INSERT INTO plante (ownerID, name, statusID, latitude, longitude) VALUES (?, ?, ?, ?, ?)", [newPlante.owner.id, newPlante.name, PlanteStatus.DISPONIBLE, newPlante.latitude, newPlante.longitude])
+        self.db.execute("INSERT INTO plante (ownerID, name, statusID, latitude, longitude, picture) VALUES (?, ?, ?, ?, ?, ?)", [newPlante.owner.id, newPlante.name, PlanteStatus.DISPONIBLE, newPlante.latitude, newPlante.longitude, newPlante.picture])
         return self.db.execute("SELECT last_insert_rowid()")[0][0]
     def PlanteSearchAll(self, searchSettings: SearchSettings) -> list[Plante]:
         """
@@ -271,7 +284,7 @@ class Database:
         :param searchSettings: Paramètres de recherche
         :return: Liste de plantes
         """
-        request: str = "SELECT * FROM plante WHERE "
+        request: str = "SELECT id FROM plante WHERE "
         requestData: list = []
         if searchSettings.availablePlante:
             request += "(statusID = ?"
@@ -296,8 +309,8 @@ class Database:
         if searchSettings.ownerID != -1:
             if len(requestData) > 0:
                 request += " AND "
-            request += "ownerID = ?"
-            requestData.append(searchSettings.guardianID)
+            request += "ownerID = ?"é
+            requestData.append(searchSettings.ownerID)
         if searchSettings.guardianID != -1:
             if len(requestData) > 0:
                 request += " AND "
@@ -312,11 +325,11 @@ class Database:
             requestData.append(searchSettings.longitude - searchSettings.radius)
             requestData.append(searchSettings.longitude + searchSettings.radius)
         request += " ORDER BY id DESC"
-        plantes = self.db.execute(request, requestData)
+
+        plantesIDs = self.db.execute(request, requestData)
         returnPlantes: list[Plante] = []
-        for plante in plantes:
-            returnPlantes.append(Plante(plante[0], plante[1], plante[2], plante[3], plante[4], plante[5], plante[6], datetime.datetime.strptime(plante[7], "%Y-%m-%d %H:%M:%S")))
-        print(returnPlantes)
+        for planteID in plantesIDs:
+            returnPlantes.append(self.PlanteGetByID(planteID[0]))
         return returnPlantes
     def PlanteDelete(self, plante: Plante) -> None:
         """
@@ -324,6 +337,8 @@ class Database:
         :param plante: Plante à supprimer
         :return: None
         """
-        self.db.execute("DELETE FROM plante WHERE planteID = ?", [plante.id])
+        self.db.execute("DELETE FROM plante WHERE id = ?", [plante.id])
         return
     ##########
+
+    

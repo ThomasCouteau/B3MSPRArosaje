@@ -153,9 +153,8 @@ POST /plant/add
 ```json
 GET /plante/search
 ```
-### Response
+### Body
 ```json
-200 OK
 {
     "searchSetting":{
         "availablePlante": bool,        // Si la plante est disponible
@@ -178,13 +177,22 @@ GET /plante/search
 [
     {
         "id": int,
-        "ownerID": int,
-        "guardianID": int,
+        "owner":  {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+        },
+        "guardian": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+        },
         "name": str,
         "latitude": float,
         "longitude": float,
         "planteStatus": int {0=Disponible, 1=Gardée, 2=Terminée},
-        "createdAt": datetime
+        "createdAt": datetime,
+        "picture": BLOB
     },
     ...
 ]
@@ -238,3 +246,4 @@ POST /plante/delete/{plantID}
 ```
 
 ## Mettre à jours le gardien d'une plante
+

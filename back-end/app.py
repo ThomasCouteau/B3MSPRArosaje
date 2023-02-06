@@ -166,8 +166,6 @@ def GetPlanteAll(searchSetting: SearchSettings, token: Token):
     token: Token = db.TokenGetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
-
-    print("ok")
     plantes: list[Plante] = db.PlanteSearchAll(searchSetting)
     return plantes
 
@@ -221,7 +219,6 @@ def DeletePlante(planteID: int, token: Token):
 
     db.PlanteDelete(plante)
     return Response(status_code=200)
-
 ##################
 
 

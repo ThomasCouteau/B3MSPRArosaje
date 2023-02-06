@@ -372,7 +372,7 @@ POST /conversation/add
 409 Conversation already exists
 ```
 
-<!-- ## Récupération les IDs des messages d'une conversation
+## Récupération les IDs des messages d'une conversation
 ### Request
 ```json
 POST /conversation/{conversationID}
@@ -393,6 +393,6 @@ POST /conversation/{conversationID}
     ...
 ]
 
-401 Unauthorized
+401 Unauthorized (not owner or guardian or admin)
 404 Conversation not found
-``` -->
+```

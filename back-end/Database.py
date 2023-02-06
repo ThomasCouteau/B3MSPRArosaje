@@ -408,6 +408,19 @@ class Database:
             returnConversation.guardian.picture = None
             returnConversation.guardian.lastConnection = None
         return returnConversation
+    def MessageIDsGetByConversationID(self, conversationID: int) -> list[int]:
+        """
+        Récupère tous les messages d'une conversation
+        :param conversationID: ID de la conversation
+        :return: Liste des IDs des messages
+        """
+        messages = self.db.execute("SELECT id FROM privateMessage WHERE conversationID = ? ORDER BY id DESC", [conversationID])
+        if len(messages) == 0:
+            return None
+        returnMessagesID: list[int] = []
+        for message in messages:
+            returnMessagesID.append(message[0])
+        return returnMessagesID
 
     def ConversationAdd(self, newConversation: Conversation) -> int:
         """

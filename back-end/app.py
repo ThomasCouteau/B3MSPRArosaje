@@ -297,6 +297,32 @@ def GetConversations(token: Token):
 
     conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
     return conversations
+@app.post("/conversation/{conversationID}/", response_model=list[int])
+def GetConversationMessagesID(conversationID: int, token: Token):
+    """
+    Récupère les messages d'une conversation
+    :param conversationID: ID de la conversation
+    :return: 200 Si connecté, messages récupérés
+    :return: 401 Si mauvais accessToken (ou introuvable), ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas dans la conversation
+    :return: 404 Si la conversation n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    conversation: Conversation = db.ConversationGetByID(conversationID)
+    if not(conversation.owner.id == token.userID or conversation.guardian.id == token.userID):
+        return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
+
+    if(conversation == None):                                       # Si la conversation n'existe pas
+        return Response(status_code=404)
+
+    messagesID: list[int] = db.MessageIDsGetByConversationID(conversationID)
+    return messagesID
 
 @app.post("/conversation/add/")
 def AddConversation(conversation: Conversation, token: Token):
@@ -329,7 +355,8 @@ def AddConversation(conversation: Conversation, token: Token):
     conversationID: int = db.ConversationAdd(conversation)
     returnData: dict = {"conversationID": conversationID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
-
+# @app.post("/conversation/sendMessage/")
+# def SendMessage(message: PrivateMessage, token: Token):
 ########################
 
 if __name__ == '__main__':

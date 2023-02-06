@@ -470,3 +470,81 @@ POST /conversation/{conversationID}/add/
 401 Unauthorized (not owner or guardian or admin)
 404 Conversation not found
 ```
+
+# COMMENTAIRES
+## Récupération des commentaires d'une plante
+### Request
+```json
+POST /commentaire/{plantID}
+```
+### Body
+```json
+{
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+200 OK
+[
+    {
+        "id": int,
+        "plante": {
+            "id": int,
+            "owner": {
+                "id": int,
+                "userTypeID": int,
+                "pseudo": str,
+            },
+            "guardian": {
+                "id": int,
+                "userTypeID": int,
+                "pseudo": str,
+            },
+            "name": str,
+            "latitude": float,
+            "longitude": float,
+            "planteStatus": int {0=Disponible, 1=Gardée, 2=Terminée},
+            "createdAt": datetime
+        },
+        "author": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+        },
+        "message": str,
+        "date": datetime
+    },
+    ...
+]
+
+401 Unauthorized
+404 Plant not found
+```
+
+## Ajouter un commentaire
+### Request
+```json
+POST /commentaire/{planteID}/add/
+```
+### Body
+```json
+200 OK
+{
+    "comment":{
+        "message": str
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+201 Created
+{
+    "commentID": int
+}
+```

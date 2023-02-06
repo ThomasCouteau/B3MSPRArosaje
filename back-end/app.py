@@ -417,5 +417,63 @@ def AddConversationMessage(conversationID: int, message: PrivateMessage, token: 
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
 ########################
 
+##### COMMENTS #####
+@app.post("/commentaire/{plantID}", response_model=list[Comment])
+def GetComments(plantID: int, token: Token):
+    """
+    Récupère les commentaires d'une plante
+    :param plantID: ID de la plante
+    :return: 200 Si connecté, commentaires récupérés
+    :return: 401 Si mauvais accessToken (ou introuvable)
+    :return: 404 Si la plante n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    plante: Plante = db.PlanteGetByID(plantID)
+    if(plante == None):                                             # Si la plante n'existe pas
+        return Response(status_code=404)
+
+    comments: list[Comment] = db.CommentGetByPlanteID(plantID)
+    return comments
+
+@app.post("/commentaire/{planteID}/add/")
+def AddComment(planteID: int, comment: Comment, token: Token):
+    """
+    Ajoute un commentaire à une plante
+    :param plantID: ID de la plante
+    :param comment: Commentaire à ajouter
+    :return: 201 Si connecté, commentaire ajouté
+    :return: 400 Si mauvais paramètres (message None)
+    :return: 401 Si mauvais accessToken (ou introuvable)
+    :return: 404 Si la plante n'existe pas
+    """
+    if(comment.message == None):                                    # Si le commentaire est vide
+        return Response(status_code=400)
+
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    plante: Plante = db.PlanteGetByID(planteID)
+    if(plante == None):                                             # Si la plante n'existe pas
+        return Response(status_code=404)
+
+    comment.plante = plante
+    comment.author = db.UserGetByID(token.userID)
+    commentID: int = db.CommentAdd(comment)
+    returnData: dict = {"commentID": commentID}
+    return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
+####################
+
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1')

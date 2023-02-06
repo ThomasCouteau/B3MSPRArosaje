@@ -108,18 +108,9 @@ class PrivateMessage:
 
 ##### FORUM #####
 @dataclass
-class Post:
-    id: Union[int, None] = None
-    author: Union[User, None] = None
-    plante: Union[Plante, None] = None
-    title: Union[str, None] = None
-    picture: Union[str, None] = None
-    date: Union[datetime.datetime, None] = None
-
-@dataclass
 class Comment:
     id: Union[int, None] = None
-    post: Union[Post, None] = None
+    plante: Union[Plante, None] = None
     author: Union[User, None] = None
     message: Union[str, None] = None
     date: Union[datetime.datetime, None] = None
@@ -454,4 +445,45 @@ class Database:
         """
         self.db.execute("INSERT INTO privateMessage (conversationID, senderID, message, picture) VALUES (?, ?, ?, ?)", [newMessage.conversation.id, newMessage.sender.id, newMessage.message, newMessage.picture])
         return self.db.execute("SELECT last_insert_rowid()")[0][0]
-    ################    
+    ################
+
+    # COMMENTS #
+    def CommentGetByPlanteID(self, plantID: int) -> list[Comment]:
+        """
+        Récupère tous les commentaires d'une plante
+        :param plantID: ID de la plante
+        :return: Liste de commentaires
+        """
+        comments = self.db.execute("SELECT id FROM comment WHERE planteID = ? ORDER BY id DESC", [plantID])
+        if len(comments) == 0:
+            return None
+        returnComments: list[Comment] = []
+        for comment in comments:
+            returnComments.append(self.CommentGetByID(comment[0]))
+        return returnComments
+    def CommentGetByID(self, commentID: int) -> Comment:
+        """
+        Récupère un commentaire par son ID
+        :param commentID: ID du commentaire
+        :return: Commentaire
+        """
+        comment = self.db.execute("SELECT id, planteID, authorID, message, date FROM comment WHERE id = ?", [commentID])
+        if len(comment) == 0:
+            return None
+        comment = comment[0]
+        returnComment: Comment = Comment(comment[0], self.PlanteGetByID(comment[1]), self.UserGetByID(comment[2]), comment[3], comment[4])
+        returnComment.author.password = None
+        returnComment.author.token = None
+        returnComment.author.picture = None
+        returnComment.author.lastConnection = None
+        return returnComment
+
+    def CommentAdd(self, newComment: Comment) -> int:
+        """
+        Ajoute un commentaire à la base de données
+        :param newComment: Commentaire à ajouter
+        :return: commentID
+        """
+        self.db.execute("INSERT INTO comment (planteID, authorID, message) VALUES (?, ?, ?)", [newComment.plante.id, newComment.author.id, newComment.message])
+        return self.db.execute("SELECT last_insert_rowid()")[0][0]
+    ############

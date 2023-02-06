@@ -548,3 +548,24 @@ POST /commentaire/{planteID}/add/
     "commentID": int
 }
 ```
+
+## Supprimer un commentaire
+### Request
+```json
+POST /commentaire/{commentID}/delete/
+```
+### Body
+```json
+{
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+200 OK
+
+401 Unauthorized (not owner or admin)
+404 Comment not found
+```

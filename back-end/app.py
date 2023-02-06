@@ -473,6 +473,33 @@ def AddComment(planteID: int, comment: Comment, token: Token):
     commentID: int = db.CommentAdd(comment)
     returnData: dict = {"commentID": commentID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
+
+@app.post("/commentaire/{commentID}/delete/")
+def DeleteComment(commentID: int, token: Token):
+    """
+    Supprime un commentaire
+    :param commentID: ID du commentaire
+    :return: 200 Si connecté, commentaire supprimé
+    :return: 401 Si mauvais accessToken (ou introuvable)
+    :return: 404 Si le commentaire n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    comment: Comment = db.CommentGetByID(commentID)
+    if(comment == None):                                            # Si le commentaire n'existe pas
+        return Response(status_code=404)
+
+    if not(comment.author.id == token.userID):                      # Si l'utilisateur n'est pas l'auteur du commentaire
+        return Response(status_code=401)
+
+    db.CommentDelete(commentID)
+    return Response(status_code=200)
 ####################
 
 if __name__ == '__main__':

@@ -486,4 +486,10 @@ class Database:
         """
         self.db.execute("INSERT INTO comment (planteID, authorID, message) VALUES (?, ?, ?)", [newComment.plante.id, newComment.author.id, newComment.message])
         return self.db.execute("SELECT last_insert_rowid()")[0][0]
+    def CommentDelete(self, commentID: int):
+        """
+        Supprime un commentaire de la base de données
+        :param commentID: ID du commentaire à supprimer
+        """
+        self.db.execute("DELETE FROM comment WHERE id = ?", [commentID])
     ############

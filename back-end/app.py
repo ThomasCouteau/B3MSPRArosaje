@@ -225,7 +225,7 @@ def UpdatePlanteStatus(plante: Plante, token: Token):
     """
     Met à jour le status d'une plante
     :param plante: Plante à mettre à jour
-    :return: 200 Si connecté et administrateur, plante mise à jour
+    :return: 200 Si connecté et administrateur/proprietaire, plante mise à jour
     :return: 401 Si mauvais accessToken (ou introuvable) ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas l'utilisateur de la plante
     :return: 404 Si la plante n'existe pas
     """
@@ -247,6 +247,36 @@ def UpdatePlanteStatus(plante: Plante, token: Token):
     planteToUpdate.status = plante.status
     db.PlanteUpdate(planteToUpdate)
     return Response(status_code=200)
+
+@app.post("/plante/updateGuardian/")
+def UpdatePlanteGuardian(plante: Plante, token: Token):
+    """
+    Met à jour le gardien d'une plante
+    :param plante: Plante à mettre à jour
+    :return: 200 Si connecté et administrateur/proprietaire, plante mise à jour
+    :return: 401 Si mauvais accessToken (ou introuvable) ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas l'utilisateur de la plante
+    :return: 404 Si la plante n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    planteToUpdate: Plante = db.PlanteGetByID(plante.id)            # Plante à mettre à jour
+    if(planteToUpdate == None):                                     # Si la plante n'existe pas
+        return Response(status_code=404)
+    requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
+    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id)):
+        return Response(status_code=401)                            # Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur de la plante
+
+    planteToUpdate.guardian = plante.guardian
+    db.PlanteUpdate(planteToUpdate)
+    return Response(status_code=200)
+
+
 ##################
 
 

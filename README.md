@@ -273,13 +273,20 @@ POST /plante/updateStatus/
 ## Mettre à jours le gardien d'une plante
 ### Request
 ```json
-POST /plante/updateGuardian/{plantID}
+POST /plante/updateGuardian/
 ```
 ### Body
 ```json
 {
-    "guardianID": int,
-    "accessToken": str
+    "plante":{
+        "id": int,
+        "guardian": {       # Ou null pour supprimer le gardien
+            "id": int
+        }
+    },
+    "token": {
+        "accessToken": str
+    }
 }
 ```
 ### Response

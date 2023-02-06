@@ -275,11 +275,30 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     planteToUpdate.guardian = plante.guardian
     db.PlanteUpdate(planteToUpdate)
     return Response(status_code=200)
-
-
 ##################
 
 
+##### CONVERSATION #####
+@app.post("/conversation/", response_model=list[Conversation])
+def GetConversations(token: Token):
+    """
+    Récupère les conversations d'un utilisateur
+    :param token: Token de l'utilisateur
+    :return: 200 Si connecté, conversations récupérées
+    :return: 401 Si mauvais accessToken (ou introuvable)
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
+    return conversations
+
+########################
 
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1')

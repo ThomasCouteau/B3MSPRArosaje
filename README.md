@@ -118,6 +118,7 @@ POST /user/delete/{userID}
 ```
 
 
+
 # PLANTES
 ## Ajout d'une plante
 ### Request
@@ -296,3 +297,40 @@ POST /plante/updateGuardian/
 401 Unauthorized (not owner or admin)
 404 Plant not found
 ```
+
+
+
+
+# CONVERSATIONS
+## Récupération des conversations d'un utilisateur
+### Request
+```json
+POST /conversation/
+```
+### Body
+```json
+{
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+200 OK
+[
+    {
+        "id": int,
+        "owner": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+        },
+        "guardian": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+        }
+    },
+    ...
+]

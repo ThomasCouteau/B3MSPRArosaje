@@ -347,7 +347,42 @@ class Database:
         """
         self.db.execute("UPDATE plante SET ownerID = ?, guardianID = ?, name = ?, statusID = ?, latitude = ?, longitude = ?, picture = ? WHERE id = ?", [plante.owner.id if plante.owner != None else None, plante.guardian.id if plante.guardian != None else None, plante.name, plante.status, plante.latitude, plante.longitude, plante.picture, plante.id])
         return
-
     ##########
 
-    
+    # CONVERSATION #
+    def ConversationGetByUserID(self, userID: int) -> list[Conversation]:
+        """
+        Récupère toutes les conversations d'un utilisateur
+        :param userID: ID de l'utilisateur
+        :return: Liste de conversations
+        """
+        conversationsIDs = self.db.execute("SELECT id FROM conversation WHERE ownerID = ? OR guardianID = ?", [userID, userID])
+        if len(conversationsIDs) == 0:
+            return None
+        returnConversations: list[Conversation] = []
+        for conversationID in conversationsIDs:
+            returnConversations.append(self.ConversationGetByID(conversationID[0]))
+        return returnConversations
+    def ConversationGetByID(self, conversationID: int) -> Conversation:
+        """
+        Récupère une conversation par son ID
+        :param conversationID: ID de la conversation
+        :return: Conversation
+        """
+        conversation = self.db.execute("SELECT id, ownerID, guardianID FROM conversation WHERE id = ?", [conversationID])
+        if len(conversation) == 0:
+            return None
+        conversation = conversation[0]
+        returnConversation: Conversation = Conversation(conversation[0], self.UserGetByID(conversation[1]) if conversation[1] != None else None, self.UserGetByID(conversation[2]) if conversation[2] != None else None)
+        if returnConversation.owner != None:
+            returnConversation.owner.password = None
+            returnConversation.owner.token = None
+            returnConversation.owner.picture = None
+            returnConversation.owner.lastConnection = None
+        if returnConversation.guardian != None:
+            returnConversation.guardian.password = None
+            returnConversation.guardian.token = None
+            returnConversation.guardian.picture = None
+            returnConversation.guardian.lastConnection = None
+        return returnConversation
+    ################    

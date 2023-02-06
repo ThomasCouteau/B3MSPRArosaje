@@ -443,4 +443,30 @@ POST /conversation/message/{messageID}
 ```
 
 ## Envoyer un message
+### Request
+```json
+POST /conversation/{conversationID}/add/
+```
+### Body
+```json
+{
+    "message": {
+        "message": str,
+        "image": str (base64)
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+201 Created
+{
+    "messageID": int
+}
 
+400 Bad request (message and image are null)
+401 Unauthorized (not owner or guardian or admin)
+404 Conversation not found
+```

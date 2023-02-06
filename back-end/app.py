@@ -381,8 +381,40 @@ def AddConversation(conversation: Conversation, token: Token):
     conversationID: int = db.ConversationAdd(conversation)
     returnData: dict = {"conversationID": conversationID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
-# @app.post("/conversation/sendMessage/")
-# def SendMessage(message: PrivateMessage, token: Token):
+@app.post("/conversation/{conversationID}/add/")
+def AddConversationMessage(conversationID: int, message: PrivateMessage, token: Token):
+    """
+    Ajoute un message à une conversation
+    :param conversationID: ID de la conversation
+    :param message: Message à ajouter
+    :return: 201 Si connecté, message ajouté
+    :return: 400 Si mauvais paramètres (message et image None)
+    :return: 401 Si mauvais accessToken (ou introuvable), ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas dans la conversation
+    :return: 404 Si la conversation n'existe pas
+    """
+    if(message.message == None and message.picture == None):           # Si le message est vide
+        return Response(status_code=400)
+
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    conversation: Conversation = db.ConversationGetByID(conversationID)
+    if(conversation == None):                                       # Si la conversation n'existe pas
+        return Response(status_code=404)
+    if not(conversation.owner.id == token.userID or conversation.guardian.id == token.userID):
+        return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
+
+
+    message.conversation = conversation
+    message.sender = db.UserGetByID(token.userID)
+    messageID: int = db.MessageAdd(message)
+    returnData: dict = {"messageID": messageID}
+    return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
 ########################
 
 if __name__ == '__main__':

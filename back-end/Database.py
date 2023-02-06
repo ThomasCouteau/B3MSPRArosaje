@@ -101,7 +101,7 @@ class PrivateMessage:
     conversation: Union[Conversation, None] = None
     sender: Union[User, None]  = None
     message: Union[str, None] = None
-    image: Union[str, None] = None
+    picture: Union[str, None] = None
     date: Union[datetime.datetime, None]  = None
 ######################
 
@@ -445,5 +445,13 @@ class Database:
         :return: conversationID
         """
         self.db.execute("INSERT INTO conversation (ownerID, guardianID) VALUES (?, ?)", [newConversation.owner.id, newConversation.guardian.id])
+        return self.db.execute("SELECT last_insert_rowid()")[0][0]
+    def MessageAdd(self, newMessage: PrivateMessage) -> int:
+        """
+        Ajoute un message à la base de données
+        :param newMessage: Message à ajouter
+        :return: messageID
+        """
+        self.db.execute("INSERT INTO privateMessage (conversationID, senderID, message, picture) VALUES (?, ?, ?, ?)", [newMessage.conversation.id, newMessage.sender.id, newMessage.message, newMessage.picture])
         return self.db.execute("SELECT last_insert_rowid()")[0][0]
     ################    

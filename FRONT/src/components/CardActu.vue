@@ -14,6 +14,7 @@
     <img src="https://cdn.quasar.dev/img/mountains.jpg" />
 
     <q-card-section class="q-pt-none">
+      <div class="text-h6">Nom plante</div>
       <p class="text-body1">
         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nemo eligendi
         iste culpa fuga mollitia quibusdam voluptatem delectus consequatur

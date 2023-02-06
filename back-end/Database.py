@@ -339,14 +339,13 @@ class Database:
         """
         self.db.execute("DELETE FROM plante WHERE id = ?", [plante.id])
         return
-    def PlanteUpdateStatus(self, plante: Plante, status: int) -> None:
+    def PlanteUpdate(self, plante: Plante) -> None:
         """
-        Met à jour le statut d'une plante
+        Met à jour la plante
         :param plante: Plante
-        :param status: Nouveau statut
         :return: None
         """
-        self.db.execute("UPDATE plante SET statusID = ? WHERE id = ?", [status, plante.id])
+        self.db.execute("UPDATE plante SET ownerID = ?, guardianID = ?, name = ?, statusID = ?, latitude = ?, longitude = ?, picture = ? WHERE id = ?", [plante.owner.id if plante.owner != None else None, plante.guardian.id if plante.guardian != None else None, plante.name, plante.status, plante.latitude, plante.longitude, plante.picture, plante.id])
         return
 
     ##########

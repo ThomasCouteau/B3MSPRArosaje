@@ -244,7 +244,8 @@ def UpdatePlanteStatus(plante: Plante, token: Token):
     if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id)):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur de la plante
 
-    db.PlanteUpdateStatus(planteToUpdate, plante.status)
+    planteToUpdate.status = plante.status
+    db.PlanteUpdate(planteToUpdate)
     return Response(status_code=200)
 ##################
 

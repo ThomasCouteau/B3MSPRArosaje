@@ -1,9 +1,9 @@
 <template>
   <q-page class="q-ma-md">
-    <div class="text-h4 text-center">Fil d'actualité</div>
+    <div class="text-h4 text-center">Rechercher une plante à garder</div>
     <div class="column items-center justify-center q-ma-md">
       <div class="col">
-        <CardActu />
+        <SearchPlantMap />
       </div>
     </div>
   </q-page>
@@ -11,12 +11,10 @@
 
 <script>
 import { defineComponent } from "vue";
-import CardActu from "components/CardActu.vue";
+import SearchPlantMap from "components/SearchPlantMap.vue";
 
 export default defineComponent({
-  name: "IndexPage",
-  components: {
-    CardActu,
-  },
+  name: "MapPage",
+  components: { SearchPlantMap },
 });
 </script>

@@ -83,8 +83,8 @@ class Plante:
     status: Union[PlanteStatus, int, None] = None
     latitude: Union[float, None] = None
     longitude: Union[float, None] = None
-    creationDate: Union[datetime.datetime , None] = None
-    picture: Union[bytes , None] = None
+    creationDate: Union[datetime.datetime, None] = None
+    picture: Union[str , None] = None
 ###################
 
 
@@ -269,15 +269,6 @@ class Database:
             returnPlantes.guardian.picture = None
             returnPlantes.guardian.lastConnection = None
         return returnPlantes
-
-    def PlanteAdd(self, newPlante: Plante) -> int:
-        """
-        Ajoute une plante à la base de données
-        :param newPlante: Plante à ajouter
-        :return: planteID
-        """
-        self.db.execute("INSERT INTO plante (ownerID, name, statusID, latitude, longitude, picture) VALUES (?, ?, ?, ?, ?, ?)", [newPlante.owner.id, newPlante.name, PlanteStatus.DISPONIBLE, newPlante.latitude, newPlante.longitude, newPlante.picture])
-        return self.db.execute("SELECT last_insert_rowid()")[0][0]
     def PlanteSearchAll(self, searchSettings: SearchSettings) -> list[Plante]:
         """
         Récupère toutes les plantes de la base de données
@@ -309,7 +300,7 @@ class Database:
         if searchSettings.ownerID != -1:
             if len(requestData) > 0:
                 request += " AND "
-            request += "ownerID = ?"é
+            request += "ownerID = ?"
             requestData.append(searchSettings.ownerID)
         if searchSettings.guardianID != -1:
             if len(requestData) > 0:
@@ -331,6 +322,15 @@ class Database:
         for planteID in plantesIDs:
             returnPlantes.append(self.PlanteGetByID(planteID[0]))
         return returnPlantes
+
+    def PlanteAdd(self, newPlante: Plante) -> int:
+        """
+        Ajoute une plante à la base de données
+        :param newPlante: Plante à ajouter
+        :return: planteID
+        """
+        self.db.execute("INSERT INTO plante (ownerID, name, statusID, latitude, longitude, picture) VALUES (?, ?, ?, ?, ?, ?)", [newPlante.owner.id, newPlante.name, PlanteStatus.DISPONIBLE, newPlante.latitude, newPlante.longitude, newPlante.picture])
+        return self.db.execute("SELECT last_insert_rowid()")[0][0]
     def PlanteDelete(self, plante: Plante) -> None:
         """
         Supprime une plante
@@ -339,6 +339,16 @@ class Database:
         """
         self.db.execute("DELETE FROM plante WHERE id = ?", [plante.id])
         return
+    def PlanteUpdateStatus(self, plante: Plante, status: int) -> None:
+        """
+        Met à jour le statut d'une plante
+        :param plante: Plante
+        :param status: Nouveau statut
+        :return: None
+        """
+        self.db.execute("UPDATE plante SET statusID = ? WHERE id = ?", [status, plante.id])
+        return
+
     ##########
 
     

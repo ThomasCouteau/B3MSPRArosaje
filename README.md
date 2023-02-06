@@ -245,5 +245,47 @@ POST /plante/delete/{plantID}
 404 Plant not found
 ```
 
-## Mettre à jours le gardien d'une plante
+## Mettre à jours le statut d'une plante
+### Request
+```json
+POST /plante/updateStatus/
+```
+### Body
+```json
+{
+    "plante":{
+        "id": int,
+        "status": int {0=Disponible, 1=Gardée, 2=Terminée}
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+### Response
+```json
+200 OK
 
+401 Unauthorized (not owner or admin)
+404 Plant not found
+```
+
+## Mettre à jours le gardien d'une plante
+### Request
+```json
+POST /plante/updateGuardian/{plantID}
+```
+### Body
+```json
+{
+    "guardianID": int,
+    "accessToken": str
+}
+```
+### Response
+```json
+200 OK
+
+401 Unauthorized (not owner or admin)
+404 Plant not found
+```

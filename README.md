@@ -84,7 +84,7 @@ POST /user/logout
 ## Récupération des données d'un utilisateur
 ### Request
 ```json
-GET /user/{userID}
+POST /user/{userID}
 ```
 ### Body
 ```json
@@ -117,6 +117,28 @@ POST /user/delete/{userID}
 401 Unauthorized
 ```
 
+## Récupération de l'utilisateur connecté
+### Request
+```json
+POST /user/me
+```
+### Body
+```json
+{
+    "accessToken": str
+}
+```
+### Response
+```json
+200 OK
+{
+    "userID": int,
+    "userTypeID": int{1=Botaniste, 2=Admin, 3=Gardien},
+    "pseudo": str,
+}
+
+401 Unauthorized
+```
 
 
 # PLANTES

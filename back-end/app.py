@@ -129,6 +129,27 @@ def DeleteUser(userID: int, token: Token):
         return Response(status_code=404)
     db.UserDelete(user)
     return Response(status_code=200)
+
+@app.post("/user/me", response_model=User)
+def CurrentUser(token: Token):
+    """
+    Renvoie l'utilisateur connecté
+    :param token: Token de l'utilisateur connecté
+    :return: 200 si connecté, User
+    :return: 401 si mauvais accessToken (ou introuvable)
+    """
+    if(token.accessToken == None):
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    user: User = db.UserGetByID(token.userID)
+    del user.password
+    del user.token
+    return user
 ################
 
 

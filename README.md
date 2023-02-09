@@ -497,11 +497,14 @@ POST /conversation/{conversationID}/add/
 ## Récupération des commentaires d'une plante
 ### Request
 ```json
-POST /commentaire/{plantID}
+POST /commentaire/
 ```
 ### Body
 ```json
 {
+    "plante":{
+        "id": int
+    },
     "token": {
         "accessToken": str
     }

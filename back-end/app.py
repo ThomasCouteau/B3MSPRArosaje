@@ -449,11 +449,10 @@ def AddConversationMessage(conversationID: int, message: PrivateMessage, token: 
 ########################
 
 ##### COMMENTS #####
-@app.post("/commentaire/{plantID}", response_model=list[Comment])
-def GetComments(plantID: int, token: Token):
+@app.post("/commentaire/", response_model=list[Comment])
+def GetComments(plante: Plante, token: Token):
     """
     Récupère les commentaires d'une plante
-    :param plantID: ID de la plante
     :return: 200 Si connecté, commentaires récupérés
     :return: 401 Si mauvais accessToken (ou introuvable)
     :return: 404 Si la plante n'existe pas
@@ -466,11 +465,11 @@ def GetComments(plantID: int, token: Token):
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(plantID)
+    plante: Plante = db.PlanteGetByID(plante.id)
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
 
-    comments: list[Comment] = db.CommentGetByPlanteID(plantID)
+    comments: list[Comment] = db.CommentGetByPlanteID(plante.id)
     return comments
 
 @app.post("/commentaire/{planteID}/add/")

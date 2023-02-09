@@ -108,7 +108,18 @@ POST /user/{userID}
 ## Suppression d'un utilisateur
 ### Request
 ```json
-POST /user/delete/{userID}
+POST /user/delete/
+```
+### Body
+```json
+{
+    "user": {
+        "id": int
+    },
+    "token": {
+        "accessToken": str
+    }
+}
 ```
 ### Response
 ```json
@@ -226,12 +237,17 @@ POST /plante/search
 ## Récupération des données d'une plante
 ### Request
 ```json
-POST /plante/{plantID}
+POST /plante/
 ```
 ### Body
 ```json
 {
-    "accessToken": str
+    "plante": {
+        "id": int
+    },
+    "token": {
+        "accessToken": str
+    }
 }
 ```
 ### Response
@@ -252,12 +268,17 @@ POST /plante/{plantID}
 ## Supprimer une plante
 ### Request
 ```json
-POST /plante/delete/{plantID}
+POST /plante/delete/
 ```
 ### Body
 ```json
 {
-    "accessToken": str
+    "plante": {
+        "id": int
+    },
+    "token": {
+        "accessToken": str
+    }
 }
 ```
 ### Response
@@ -397,11 +418,14 @@ POST /conversation/add
 ## Récupération les IDs des messages d'une conversation
 ### Request
 ```json
-POST /conversation/{conversationID}
+POST /conversation/
 ```
 ### Body
 ```json
 {
+    "conversation": {
+        "id": int
+    },
     "token": {
         "accessToken": str
     }
@@ -422,11 +446,14 @@ POST /conversation/{conversationID}
 ## Récupération du contenu d'un message
 ### Request
 ```json
-POST /conversation/message/{messageID}
+POST /conversation/GetMessage/
 ```
 ### Body
 ```json
 {
+    "message": {
+        "id": int
+    },
     "token": {
         "accessToken": str
     }
@@ -497,11 +524,14 @@ POST /conversation/{conversationID}/add/
 ## Récupération des commentaires d'une plante
 ### Request
 ```json
-POST /commentaire/{plantID}
+POST /commentaire/
 ```
 ### Body
 ```json
 {
+    "plante":{
+        "id": int
+    },
     "token": {
         "accessToken": str
     }
@@ -574,11 +604,14 @@ POST /commentaire/{planteID}/add/
 ## Supprimer un commentaire
 ### Request
 ```json
-POST /commentaire/{commentID}/delete/
+POST /commentaire/delete/
 ```
 ### Body
 ```json
 {
+    "comment":{
+        "id": int
+    },
     "token": {
         "accessToken": str
     }

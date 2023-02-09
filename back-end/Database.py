@@ -252,12 +252,10 @@ class Database:
         if returnPlantes.owner != None:
             returnPlantes.owner.password = None
             returnPlantes.owner.token = None
-            returnPlantes.owner.picture = None
             returnPlantes.owner.lastConnection = None
         if returnPlantes.guardian != None:
             returnPlantes.guardian.password = None
             returnPlantes.guardian.token = None
-            returnPlantes.guardian.picture = None
             returnPlantes.guardian.lastConnection = None
         return returnPlantes
     def PlanteSearchAll(self, searchSettings: SearchSettings) -> list[Plante]:

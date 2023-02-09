@@ -174,7 +174,7 @@ POST /plant/add
 ## Récupération de toute les plantes
 ### Request
 ```json
-GET /plante/search
+POST /plante/search
 ```
 ### Body
 ```json
@@ -226,7 +226,7 @@ GET /plante/search
 ## Récupération des données d'une plante
 ### Request
 ```json
-GET /plante/{plantID}
+POST /plante/{plantID}
 ```
 ### Body
 ```json

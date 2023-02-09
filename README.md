@@ -1,12 +1,17 @@
 # B3MSPRArosaje
 
 # AUTHENTIFICATION
+
 ## Creation utilisateur
+
 ### Request
+
 ```
 POST /user/register
 ```
+
 ### Body
+
 ```json
 {
     "userTypeID": int{1=Botaniste, 2=Admin, 3=Gardien},
@@ -14,25 +19,33 @@ POST /user/register
     "password": str
 }
 ```
+
 ### Response
+
 ```json
 201 Created
 409 Pseudo already exists
 ```
 
 ## Connexion utilisateur
+
 ### Request
+
 ```
 POST /user/login
 ```
+
 ### Body
+
 ```json
 {
     "pseudo": str,
     "password": str
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 {
@@ -44,17 +57,23 @@ POST /user/login
 ```
 
 ## Regénération du token d'accès
+
 ### Request
+
 ```
 POST /user/refreshToken
 ```
+
 ### Body
+
 ```json
 {
     "refreshToken": str
 }
 ```
+
 ## Response
+
 ```json
 200 OK
 {
@@ -66,33 +85,45 @@ POST /user/refreshToken
 ```
 
 ## Déconnexion utilisateur
+
 ### Request
+
 ```
 POST /user/logout
 ```
+
 ### Body
+
 ```json
 {
     "userID": int
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 ```
 
 ## Récupération des données d'un utilisateur
+
 ### Request
+
 ```json
-GET /user/{userID}
+POST /user/{userID}
 ```
+
 ### Body
+
 ```json
 {
     "accessToken": str
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 {
@@ -106,26 +137,75 @@ GET /user/{userID}
 ```
 
 ## Suppression d'un utilisateur
+
 ### Request
+
 ```json
-POST /user/delete/{userID}
+POST /user/delete/
 ```
+
+### Body
+
+```json
+{
+    "user": {
+        "id": int
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+
 ### Response
+
 ```json
 200 OK (admin or user himself)
 404 User not found
 401 Unauthorized
 ```
 
+## Récupération de l'utilisateur connecté
 
+### Request
+
+```json
+POST /user/me
+```
+
+### Body
+
+```json
+{
+    "accessToken": str
+}
+```
+
+### Response
+
+```json
+200 OK
+{
+    "userID": int,
+    "userTypeID": int{1=Botaniste, 2=Admin, 3=Gardien},
+    "pseudo": str,
+}
+
+401 Unauthorized
+```
 
 # PLANTES
+
 ## Ajout d'une plante
+
 ### Request
+
 ```json
 POST /plant/add
 ```
+
 ### Body
+
 ```json
 {
   "plante": {
@@ -138,7 +218,9 @@ POST /plant/add
   }
 }
 ```
+
 ### Response
+
 ```json
 201 Created
 {
@@ -150,11 +232,15 @@ POST /plant/add
 ```
 
 ## Récupération de toute les plantes
+
 ### Request
+
 ```json
-GET /plante/search
+POST /plante/search
 ```
+
 ### Body
+
 ```json
 {
     "searchSetting":{
@@ -172,7 +258,9 @@ GET /plante/search
     }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 [
@@ -202,17 +290,28 @@ GET /plante/search
 ```
 
 ## Récupération des données d'une plante
+
 ### Request
+
 ```json
-GET /plante/{plantID}
+POST /plante/
 ```
+
 ### Body
+
 ```json
 {
-    "accessToken": str
+    "plante": {
+        "id": int
+    },
+    "token": {
+        "accessToken": str
+    }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 {
@@ -228,17 +327,28 @@ GET /plante/{plantID}
 ```
 
 ## Supprimer une plante
+
 ### Request
+
 ```json
-POST /plante/delete/{plantID}
+POST /plante/delete/
 ```
+
 ### Body
+
 ```json
 {
-    "accessToken": str
+    "plante": {
+        "id": int
+    },
+    "token": {
+        "accessToken": str
+    }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 
@@ -247,11 +357,15 @@ POST /plante/delete/{plantID}
 ```
 
 ## Mettre à jours le statut d'une plante
+
 ### Request
+
 ```json
 POST /plante/updateStatus/
 ```
+
 ### Body
+
 ```json
 {
     "plante":{
@@ -263,7 +377,9 @@ POST /plante/updateStatus/
     }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 
@@ -272,11 +388,15 @@ POST /plante/updateStatus/
 ```
 
 ## Mettre à jours le gardien d'une plante
+
 ### Request
+
 ```json
 POST /plante/updateGuardian/
 ```
+
 ### Body
+
 ```json
 {
     "plante":{
@@ -290,7 +410,9 @@ POST /plante/updateGuardian/
     }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 
@@ -298,16 +420,18 @@ POST /plante/updateGuardian/
 404 Plant not found
 ```
 
-
-
-
 # CONVERSATIONS
+
 ## Récupération des conversations d'un utilisateur
+
 ### Request
+
 ```json
 POST /conversation/
 ```
+
 ### Body
+
 ```json
 {
     "token": {
@@ -315,7 +439,9 @@ POST /conversation/
     }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 [
@@ -339,11 +465,15 @@ POST /conversation/
 ```
 
 ## Création d'une conversation
+
 ### Request
+
 ```json
 POST /conversation/add
 ```
+
 ### Body
+
 ```json
 {
     "conversation": {
@@ -359,7 +489,9 @@ POST /conversation/add
     }
 }
 ```
+
 ### Response
+
 ```json
 201 Created
 {
@@ -373,19 +505,28 @@ POST /conversation/add
 ```
 
 ## Récupération les IDs des messages d'une conversation
+
 ### Request
+
 ```json
-POST /conversation/{conversationID}
+POST /conversation/
 ```
+
 ### Body
+
 ```json
 {
+    "conversation": {
+        "id": int
+    },
     "token": {
         "accessToken": str
     }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 [
@@ -398,19 +539,28 @@ POST /conversation/{conversationID}
 ```
 
 ## Récupération du contenu d'un message
+
 ### Request
+
 ```json
-POST /conversation/message/{messageID}
+POST /conversation/GetMessage/
 ```
+
 ### Body
+
 ```json
 {
+    "message": {
+        "id": int
+    },
     "token": {
         "accessToken": str
     }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 {
@@ -443,11 +593,15 @@ POST /conversation/message/{messageID}
 ```
 
 ## Envoyer un message
+
 ### Request
+
 ```json
 POST /conversation/{conversationID}/add/
 ```
+
 ### Body
+
 ```json
 {
     "message": {
@@ -459,7 +613,9 @@ POST /conversation/{conversationID}/add/
     }
 }
 ```
+
 ### Response
+
 ```json
 201 Created
 {
@@ -472,43 +628,34 @@ POST /conversation/{conversationID}/add/
 ```
 
 # COMMENTAIRES
+
 ## Récupération des commentaires d'une plante
+
 ### Request
+
 ```json
-POST /commentaire/{plantID}
+POST /commentaire/
 ```
+
 ### Body
+
 ```json
 {
+    "planteID":int ,
     "token": {
         "accessToken": str
     }
 }
 ```
+
 ### Response
+
 ```json
 200 OK
 [
     {
         "id": int,
-        "plante": {
-            "id": int,
-            "owner": {
-                "id": int,
-                "userTypeID": int,
-                "pseudo": str,
-            },
-            "guardian": {
-                "id": int,
-                "userTypeID": int,
-                "pseudo": str,
-            },
-            "name": str,
-            "latitude": float,
-            "longitude": float,
-            "planteStatus": int {0=Disponible, 1=Gardée, 2=Terminée},
-            "createdAt": datetime
-        },
+        "planteID":int ,
         "author": {
             "id": int,
             "userTypeID": int,
@@ -525,11 +672,15 @@ POST /commentaire/{plantID}
 ```
 
 ## Ajouter un commentaire
+
 ### Request
+
 ```json
 POST /commentaire/{planteID}/add/
 ```
+
 ### Body
+
 ```json
 200 OK
 {
@@ -541,10 +692,42 @@ POST /commentaire/{planteID}/add/
     }
 }
 ```
+
 ### Response
+
 ```json
 201 Created
 {
     "commentID": int
 }
+```
+
+## Supprimer un commentaire
+
+### Request
+
+```json
+POST /commentaire/delete/
+```
+
+### Body
+
+```json
+{
+    "comment":{
+        "id": int
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+
+### Response
+
+```json
+200 OK
+
+401 Unauthorized (not owner or admin)
+404 Comment not found
 ```

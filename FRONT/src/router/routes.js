@@ -1,8 +1,8 @@
 const routes = [
   {
     path: "/",
-    component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("pages/IndexPage.vue") }],
+    component: () => import("layouts/LoginLayout.vue"),
+    children: [{ path: "", component: () => import("pages/LoginPage.vue") }],
   },
   {
     path: "/profile",
@@ -32,6 +32,18 @@ const routes = [
     path: "/search",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/MapPage.vue") }],
+  },
+  {
+    path: "/home",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/IndexPage.vue") }],
+  },
+  {
+    path: "/subscribe",
+    component: () => import("layouts/LoginLayout.vue"),
+    children: [
+      { path: "", component: () => import("pages/SubscribePage.vue") },
+    ],
   },
 
   // {

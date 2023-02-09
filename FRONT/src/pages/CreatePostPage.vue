@@ -11,26 +11,18 @@
         class="q-ma-md"
         style="width: 50vw"
       />
-      <!--
-        Due to browser security policy,
-        we can only read the value, but not
-        write to it, so we only have an @update:model-value listener
-      -->
-
-      <q-input
-        @update:model-value="
-          (val) => {
-            fileToConvert = val[0];
-          }
-        "
+      <q-file
         filled
-        stack-label
+        v-model="model.picture"
         label="Photos de la plante"
-        type="file"
+        stack-label
         class="q-ma-md"
         style="width: 50vw"
+        @update:model-value="
+          async (val) => (fileToConvert = await convertFileToBase64(val))
+        "
       />
-      <q-input
+      <!-- <q-input
         v-model="model.description"
         filled
         clearable
@@ -39,7 +31,7 @@
         label="Description"
         class="q-ma-md"
         style="width: 50vw"
-      />
+      /> -->
       <q-btn
         class="q-ma-md"
         color="primary"
@@ -51,7 +43,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({
   name: "CreatePostPage",
@@ -59,32 +51,96 @@ export default defineComponent({
   setup() {
     const model = ref({
       name: "",
-      file: null,
-      description: "",
+      picture: null,
+      // description: "",
+      latitude: 0,
+      longitude: 0,
     });
-    const fileToConvert = ref(null);
-    const blob = new Blob([fileToConvert], { type: "image/png" });
-    const convertImageToBase64 = (toConvert) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(toConvert);
-      reader.onload = () => {
-        console.log(reader.result);
-        model.value.file = reader.result;
-      };
-      reader.onerror = (error) => {
-        console.log("Error: ", error);
-      };
+
+    let fileToConvert = null;
+
+    //function to convert file to base64
+    const convertFileToBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+
+        fileReader.onload = () => {
+          resolve(fileReader.result);
+          fileToConvert = fileReader.result;
+        };
+
+        fileReader.onerror = (error) => {
+          reject(error);
+        };
+      });
     };
 
-    const createPost = () => {
-      convertImageToBase64(blob);
-      console.log(model.value);
+    const getCurrentPosition = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          model.value.latitude = position.coords.latitude;
+          model.value.longitude = position.coords.longitude;
+          console.log(
+            "latitude:",
+            model.value.latitude,
+            "longitude:",
+            model.value.longitude
+          );
+        });
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
     };
+
+    const getCurrentUserDatas = async () => {
+      let accessToken = { accessToken: localStorage.getItem("accessToken") };
+      accessToken = JSON.stringify(accessToken);
+      const response = await fetch("http://127.0.0.1:8000/user/me", {
+        method: "POST",
+        body: accessToken,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const myJson = await response.json();
+      console.log(myJson);
+    };
+
+    const createPost = async () => {
+      model.value.picture = fileToConvert;
+      let accessToken = { accessToken: localStorage.getItem("accessToken") };
+      let body = {
+        plante: {
+          name: model.value.name,
+          latitude: model.value.latitude,
+          longitude: model.value.longitude,
+          picture: model.value.picture,
+        },
+        token: accessToken,
+      };
+      body = JSON.stringify(body);
+      console.log(body);
+      const response = await fetch("http://127.0.0.1:8000/plante/add", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const myJson = await response.json();
+      console.log(myJson);
+    };
+
+    onMounted(() => {
+      getCurrentUserDatas();
+      getCurrentPosition();
+    });
+
     return {
       model,
-      fileToConvert,
-      convertImageToBase64,
       createPost,
+      convertFileToBase64,
     };
   },
 });

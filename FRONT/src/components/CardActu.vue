@@ -3,18 +3,18 @@
     <q-item>
       <q-item-section avatar>
         <q-avatar>
-          <img src="https://cdn.quasar.dev/img/avatar2.jpg" />
+          <img :src="ownerPicture" />
         </q-avatar>
       </q-item-section>
 
       <q-item-section>
-        <q-item-label>Propriétaire</q-item-label>
+        <q-item-label>{{ owner }}</q-item-label>
       </q-item-section>
     </q-item>
-    <img src="https://cdn.quasar.dev/img/mountains.jpg" />
+    <img :src="plantPicture" />
 
     <q-card-section class="q-pt-none">
-      <div class="text-h6">Nom plante</div>
+      <div class="text-h6">{{ plantName }}</div>
       <p class="text-body1">
         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nemo eligendi
         iste culpa fuga mollitia quibusdam voluptatem delectus consequatur
@@ -39,7 +39,24 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "CardActu",
-  props: {},
+  props: {
+    owner: {
+      type: String,
+      default: "Propriétaire",
+    },
+    ownerPicture: {
+      type: String,
+      default: "https://cdn.quasar.dev/img/avatar2.jpg",
+    },
+    plantName: {
+      type: String,
+      default: "Nom plante",
+    },
+    plantPicture: {
+      type: String,
+      default: "https://cdn.quasar.dev/img/mountains.jpg",
+    },
+  },
 });
 </script>
 

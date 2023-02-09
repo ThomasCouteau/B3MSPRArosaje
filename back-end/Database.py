@@ -85,6 +85,7 @@ class Plante:
     longitude: Union[float, None] = None
     creationDate: Union[datetime.datetime, None] = None
     picture: Union[str , None] = None
+    comments: Union[list['Comment'], None] = None
 ###################
 
 
@@ -110,7 +111,7 @@ class PrivateMessage:
 @dataclass
 class Comment:
     id: Union[int, None] = None
-    plante: Union[Plante, None] = None
+    planteID: Union[int, None] = None
     author: Union[User, None] = None
     message: Union[str, None] = None
     date: Union[datetime.datetime, None] = None
@@ -157,7 +158,7 @@ class Database:
         :param newUser: Utilisateur à ajouter
         :return: None
         """
-        self.db.execute("INSERT INTO User (userTypeID, pseudo, password, lastConnection) VALUES (?, ?, ?, ?)", [newUser.userTypeID, newUser.pseudo, newUser.password, datetime.datetime.now()])
+        self.db.execute("INSERT INTO User (userTypeID, pseudo, password, picture, lastConnection) VALUES (?, ?, ?, ?)", [newUser.userTypeID, newUser.pseudo, newUser.password,newUser.picture, datetime.datetime.now()])
         return
     def UserDelete(self, user: User) -> None:
         """
@@ -252,13 +253,13 @@ class Database:
         if returnPlantes.owner != None:
             returnPlantes.owner.password = None
             returnPlantes.owner.token = None
-            returnPlantes.owner.picture = None
             returnPlantes.owner.lastConnection = None
         if returnPlantes.guardian != None:
             returnPlantes.guardian.password = None
             returnPlantes.guardian.token = None
-            returnPlantes.guardian.picture = None
             returnPlantes.guardian.lastConnection = None
+        # Get all comments
+        returnPlantes.comments = self.CommentGetByPlanteID(returnPlantes.id)
         return returnPlantes
     def PlanteSearchAll(self, searchSettings: SearchSettings) -> list[Plante]:
         """
@@ -456,7 +457,7 @@ class Database:
         """
         comments = self.db.execute("SELECT id FROM comment WHERE planteID = ? ORDER BY id DESC", [plantID])
         if len(comments) == 0:
-            return None
+            return []
         returnComments: list[Comment] = []
         for comment in comments:
             returnComments.append(self.CommentGetByID(comment[0]))
@@ -471,7 +472,7 @@ class Database:
         if len(comment) == 0:
             return None
         comment = comment[0]
-        returnComment: Comment = Comment(comment[0], self.PlanteGetByID(comment[1]), self.UserGetByID(comment[2]), comment[3], comment[4])
+        returnComment: Comment = Comment(comment[0], comment[1], self.UserGetByID(comment[2]), comment[3], comment[4])
         returnComment.author.password = None
         returnComment.author.token = None
         returnComment.author.picture = None
@@ -486,4 +487,10 @@ class Database:
         """
         self.db.execute("INSERT INTO comment (planteID, authorID, message) VALUES (?, ?, ?)", [newComment.plante.id, newComment.author.id, newComment.message])
         return self.db.execute("SELECT last_insert_rowid()")[0][0]
+    def CommentDelete(self, commentID: int):
+        """
+        Supprime un commentaire de la base de données
+        :param commentID: ID du commentaire à supprimer
+        """
+        self.db.execute("DELETE FROM comment WHERE id = ?", [commentID])
     ############

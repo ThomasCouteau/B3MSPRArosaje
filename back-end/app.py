@@ -4,10 +4,18 @@ from Database import *
 import uvicorn
 
 from fastapi import FastAPI, status, Response
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 db: Database = Database("ARosaJe_Data.db")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 ##### AUTH #####
 @app.post("/user/register")
@@ -92,8 +100,8 @@ def GetUser(userID: int, token: Token):
     del user.token
     return user
 
-@app.post("/user/delete/{userID}")
-def DeleteUser(userID: int, token: Token):
+@app.post("/user/delete/")
+def DeleteUser(user: User, token: Token):
     """
     Supprime un utilisateur
     :param userID: ID de l'utilisateur à supprimer
@@ -111,14 +119,35 @@ def DeleteUser(userID: int, token: Token):
         return Response(status_code=401)
 
     requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
-    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == userID)):# Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur à supprimer
+    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == user.id)):# Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur à supprimer
         return Response(status_code=401)
 
-    user: User = db.UserGetByID(userID)                             # Utilisateur à supprimer
+    user: User = db.UserGetByID(user.id)                             # Utilisateur à supprimer
     if(user == None):                                               # Si l'utilisateur n'existe pas
         return Response(status_code=404)
     db.UserDelete(user)
     return Response(status_code=200)
+
+@app.post("/user/me", response_model=User)
+def CurrentUser(token: Token):
+    """
+    Renvoie l'utilisateur connecté
+    :param token: Token de l'utilisateur connecté
+    :return: 200 si connecté, User
+    :return: 401 si mauvais accessToken (ou introuvable)
+    """
+    if(token.accessToken == None):
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    user: User = db.UserGetByID(token.userID)
+    del user.password
+    del user.token
+    return user
 ################
 
 
@@ -169,8 +198,8 @@ def GetPlanteAll(searchSetting: SearchSettings, token: Token):
     plantes: list[Plante] = db.PlanteSearchAll(searchSetting)
     return plantes
 
-@app.post("/plante/{planteID}", response_model=Plante)
-def GetPlanteByID(planteID: int, token: Token):
+@app.post("/plante/", response_model=Plante)
+def GetPlanteByID(plante: Plante, token: Token):
     """
     Renvoie une plante
     :param planteID: ID de la plante à renvoyer
@@ -186,13 +215,13 @@ def GetPlanteByID(planteID: int, token: Token):
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(planteID)
+    plante: Plante = db.PlanteGetByID(plante.id)
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
     return plante
 
-@app.post("/plante/delete/{planteID}")
-def DeletePlante(planteID: int, token: Token):
+@app.post("/plante/delete/")
+def DeletePlante(plante: Plante, token: Token):
     """
     Supprime une plante
     :param planteID: ID de la plante à supprimer
@@ -209,7 +238,7 @@ def DeletePlante(planteID: int, token: Token):
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(planteID)                     # Plante à supprimer
+    plante: Plante = db.PlanteGetByID(plante.id)                     # Plante à supprimer
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
 
@@ -297,8 +326,8 @@ def GetConversations(token: Token):
 
     conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
     return conversations
-@app.post("/conversation/{conversationID}/", response_model=list[int])
-def GetConversationMessagesID(conversationID: int, token: Token):
+@app.post("/conversation/", response_model=list[int])
+def GetConversationMessagesID(conversation: Conversation, token: Token):
     """
     Récupère les messages d'une conversation
     :param conversationID: ID de la conversation
@@ -314,17 +343,17 @@ def GetConversationMessagesID(conversationID: int, token: Token):
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    conversation: Conversation = db.ConversationGetByID(conversationID)
+    conversation: Conversation = db.ConversationGetByID(conversation.id)
     if not(conversation.owner.id == token.userID or conversation.guardian.id == token.userID):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
 
     if(conversation == None):                                       # Si la conversation n'existe pas
         return Response(status_code=404)
 
-    messagesID: list[int] = db.MessageIDsGetByConversationID(conversationID)
+    messagesID: list[int] = db.MessageIDsGetByConversationID(conversation.id)
     return messagesID
-@app.post("/conversation/GetMessage/{messageID}/", response_model=PrivateMessage)
-def GetConversationMessage(messageID: int, token: Token):
+@app.post("/conversation/GetMessage/", response_model=PrivateMessage)
+def GetConversationMessage(message: PrivateMessage, token: Token):
     """
     Récupère le contenu d'un message
     :param messageID: ID du message
@@ -340,7 +369,7 @@ def GetConversationMessage(messageID: int, token: Token):
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    message: PrivateMessage = db.MessageGetByID(messageID)
+    message: PrivateMessage = db.MessageGetByID(message.id)
     if not(message.conversation.owner.id == token.userID or message.conversation.guardian.id == token.userID):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
 
@@ -418,11 +447,10 @@ def AddConversationMessage(conversationID: int, message: PrivateMessage, token: 
 ########################
 
 ##### COMMENTS #####
-@app.post("/commentaire/{plantID}", response_model=list[Comment])
-def GetComments(plantID: int, token: Token):
+@app.post("/commentaire/", response_model=list[Comment])
+def GetComments(plante: Plante, token: Token):
     """
     Récupère les commentaires d'une plante
-    :param plantID: ID de la plante
     :return: 200 Si connecté, commentaires récupérés
     :return: 401 Si mauvais accessToken (ou introuvable)
     :return: 404 Si la plante n'existe pas
@@ -435,11 +463,11 @@ def GetComments(plantID: int, token: Token):
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(plantID)
+    plante: Plante = db.PlanteGetByID(plante.id)
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
 
-    comments: list[Comment] = db.CommentGetByPlanteID(plantID)
+    comments: list[Comment] = db.CommentGetByPlanteID(plante.id)
     return comments
 
 @app.post("/commentaire/{planteID}/add/")
@@ -456,11 +484,11 @@ def AddComment(planteID: int, comment: Comment, token: Token):
     if(comment.message == None):                                    # Si le commentaire est vide
         return Response(status_code=400)
 
-    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+    if(token== None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(db.TokenGetByAccessToken(token) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = db.TokenGetByAccessToken(token)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
@@ -473,6 +501,32 @@ def AddComment(planteID: int, comment: Comment, token: Token):
     commentID: int = db.CommentAdd(comment)
     returnData: dict = {"commentID": commentID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
+
+@app.post("/commentaire/delete/")
+def DeleteComment(comment: Comment, token: Token):
+    """
+    Supprime un commentaire
+    :return: 200 Si connecté, commentaire supprimé
+    :return: 401 Si mauvais accessToken (ou introuvable)
+    :return: 404 Si le commentaire n'existe pas
+    """
+    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    comment: Comment = db.CommentGetByID(comment.id)
+    if(comment == None):                                            # Si le commentaire n'existe pas
+        return Response(status_code=404)
+
+    if not(comment.author.id == token.userID):                      # Si l'utilisateur n'est pas l'auteur du commentaire
+        return Response(status_code=401)
+
+    db.CommentDelete(comment.id)
+    return Response(status_code=200)
 ####################
 
 if __name__ == '__main__':

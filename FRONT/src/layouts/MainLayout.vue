@@ -8,7 +8,9 @@
           v-for="link in essentialLinks"
           :key="link.title"
           v-bind="link"
-        />
+        >
+          <div v-if="link.title == 'Déconnexion'" @click="logout"></div>
+        </EssentialLink>
       </q-list>
     </q-drawer>
 
@@ -21,12 +23,13 @@
 <script>
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { useRouter } from "vue-router";
 
 const linksList = [
   {
     title: "Accueil",
     icon: "home",
-    link: "/",
+    link: "/home",
   },
   {
     title: "Recherche",
@@ -63,8 +66,31 @@ export default defineComponent({
   },
 
   setup() {
+    const route = useRouter();
+
+    const logout = async () => {
+      let tokens = {
+        accessToken: localStorage.getItem("accessToken"),
+        refreshToken: localStorage.getItem("refreshToken"),
+      };
+      tokens = JSON.stringify(tokens);
+      const response = await fetch("http://127.0.0.1:8000/user/logout", {
+        method: "POST",
+        body: tokens,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const myJson = await response.json();
+      console.log(myJson);
+      if (response.status == "200") {
+        route.push("/");
+      }
+    };
+
     return {
       essentialLinks: linksList,
+      logout,
     };
   },
 });

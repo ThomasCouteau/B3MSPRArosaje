@@ -529,9 +529,7 @@ POST /commentaire/
 ### Body
 ```json
 {
-    "plante":{
-        "id": int
-    },
+    "planteID":int ,
     "token": {
         "accessToken": str
     }
@@ -543,24 +541,7 @@ POST /commentaire/
 [
     {
         "id": int,
-        "plante": {
-            "id": int,
-            "owner": {
-                "id": int,
-                "userTypeID": int,
-                "pseudo": str,
-            },
-            "guardian": {
-                "id": int,
-                "userTypeID": int,
-                "pseudo": str,
-            },
-            "name": str,
-            "latitude": float,
-            "longitude": float,
-            "planteStatus": int {0=Disponible, 1=Gardée, 2=Terminée},
-            "createdAt": datetime
-        },
+        "planteID":int ,
         "author": {
             "id": int,
             "userTypeID": int,

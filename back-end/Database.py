@@ -158,7 +158,7 @@ class Database:
         :param newUser: Utilisateur à ajouter
         :return: None
         """
-        self.db.execute("INSERT INTO User (userTypeID, pseudo, password, lastConnection) VALUES (?, ?, ?, ?)", [newUser.userTypeID, newUser.pseudo, newUser.password, datetime.datetime.now()])
+        self.db.execute("INSERT INTO User (userTypeID, pseudo, password, picture, lastConnection) VALUES (?, ?, ?, ?)", [newUser.userTypeID, newUser.pseudo, newUser.password,newUser.picture, datetime.datetime.now()])
         return
     def UserDelete(self, user: User) -> None:
         """

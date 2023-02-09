@@ -454,7 +454,7 @@ class Database:
         """
         comments = self.db.execute("SELECT id FROM comment WHERE planteID = ? ORDER BY id DESC", [plantID])
         if len(comments) == 0:
-            return None
+            return []
         returnComments: list[Comment] = []
         for comment in comments:
             returnComments.append(self.CommentGetByID(comment[0]))

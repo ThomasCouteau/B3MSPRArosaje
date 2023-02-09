@@ -487,11 +487,11 @@ def AddComment(planteID: int, comment: Comment, token: Token):
     if(comment.message == None):                                    # Si le commentaire est vide
         return Response(status_code=400)
 
-    if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
+    if(accessToken== None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(db.TokenGetByAccessToken(accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = db.TokenGetByAccessToken(accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 

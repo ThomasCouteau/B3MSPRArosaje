@@ -486,9 +486,9 @@ def AddComment(planteID: int, comment: Comment, token: Token):
 
     if(token== None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token) == None):        # Si l'accessToken n'existe pas
+    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 

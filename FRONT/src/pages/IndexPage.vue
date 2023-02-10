@@ -26,13 +26,12 @@
           <q-card-section class="q-pt-none">
             <div class="text-h6 text-capitalize">{{ plantesActu.name }}</div>
             <div v-if="plantesActu.comments.length != 0">
-              <!-- <p id="commentsList">
-                <span class="text-subtitle2">
-                  {{ plantesActu.comments[0].author.pseudo }}:
-                </span>
-                {{ plantesActu.comments[0].message }}
-              </p> -->
-              <p v-for="(comment, index) in plantesActu.comments" :key="index">
+              <p
+                v-for="(comment, index) in plantesActu.comments
+                  .slice()
+                  .reverse()"
+                :key="index"
+              >
                 <span class="text-subtitle2">
                   {{ comment.author.pseudo }}:
                 </span>
@@ -45,11 +44,21 @@
 
             <q-separator />
             <div class="row items-center">
-              <div class="col-10">
-                <q-input borderless label="Commentaires" />
+              <div class="col-8">
+                <q-input
+                  borderless
+                  v-model="model.message"
+                  label="Commentaire"
+                />
               </div>
               <div class="col-2">
-                <q-btn flat rounded color="primary" label="Publier" />
+                <q-btn
+                  flat
+                  rounded
+                  color="primary"
+                  label="Publier"
+                  @click="addCommentToPlante(plantesActu.id)"
+                />
               </div>
             </div>
           </q-card-section>
@@ -60,7 +69,7 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "IndexPage",
@@ -102,6 +111,42 @@ export default defineComponent({
     };
 
     getAllKeepPlante();
+  },
+  setup() {
+    const model = {
+      message: "",
+    };
+    const accessToken = localStorage.getItem("accessToken");
+
+    const addCommentToPlante = async (planteID) => {
+      let body = {
+        comment: {
+          message: model.message,
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(
+        "http://127.0.0.1:8000/commentaire/" + planteID + "/add/",
+        {
+          method: "POST",
+          body: body,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const myJson = await response.json();
+      console.log(myJson);
+      location.reload();
+    };
+
+    return {
+      model,
+      addCommentToPlante,
+    };
   },
 });
 </script>

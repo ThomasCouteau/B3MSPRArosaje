@@ -136,6 +136,51 @@ POST /user/{userID}
 401 Unauthorized
 ```
 
+## Recherche d'utilisateurs
+
+### Request
+
+```
+POST /user/Search
+```
+
+### Body
+
+```json
+{
+    "search":  {
+        "search": {
+        "isBotaniste": bool,
+        "isGardien": bool,
+        "isAdministrator": bool
+        }
+    },
+    "token": {
+        "accessToken": str
+    }
+}
+```
+
+## Response
+
+```json
+200 OK
+
+[
+    {
+        "id": int,
+        "userTypeID": int,
+        "pseudo": str,
+        "lastConnection": str,
+        "picture": str
+    },
+    ...
+]
+
+
+401 Mauvais refreshToken ou introuvable
+```
+
 ## Suppression d'un utilisateur
 
 ### Request
@@ -451,11 +496,15 @@ POST /conversation/
             "id": int,
             "userTypeID": int,
             "pseudo": str,
+            "picture":str,
+            "lastConnection": str
         },
         "guardian": {
             "id": int,
             "userTypeID": int,
             "pseudo": str,
+            "picture":str,
+            "lastConnection": str
         }
     },
     ...
@@ -509,7 +558,7 @@ POST /conversation/add
 ### Request
 
 ```json
-POST /conversation/
+POST /conversation/Get/
 ```
 
 ### Body

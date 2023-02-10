@@ -33,7 +33,7 @@
           <q-input
             rounded
             outlined
-            v-model="text"
+            v-model="model.message"
             label="Ecrire un message..."
             class="col"
           />
@@ -42,7 +42,8 @@
             color="primary"
             icon="send"
             class="q-ml-sm"
-            :disable="!text"
+            :disable="!model.message"
+            @click="addMessage"
           />
         </div>
       </div>
@@ -52,13 +53,101 @@
 
 <script>
 import { defineComponent, ref } from "vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "ChatMessage",
   props: {},
+  data() {
+    return {
+      allMessages: [],
+    };
+  },
+  mounted() {
+    const accessToken = localStorage.getItem("accessToken");
+
+    const getAllMessages = async () => {
+      let body = {
+        conversation: {
+          id: this.$route.params.id,
+        },
+
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch("http://127.0.0.1:8000/conversation/Get/", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      this.allMessages = await response.json();
+      console.log("messages:", this.allMessages);
+    };
+    getAllMessages();
+  },
   setup() {
-    const text = ref("");
-    return { text };
+    const model = ref({
+      message: "",
+    });
+
+    const accessToken = localStorage.getItem("accessToken");
+    const route = useRoute();
+
+    const getMessage = async () => {
+      let body = {
+        message: {
+          id: 12,
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(
+        "http://127.0.0.1:8000/conversation/GetMessage/",
+        {
+          method: "POST",
+          body: body,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const myJson = await response.json();
+      console.log("getMessage:", myJson);
+    };
+
+    const addMessage = async () => {
+      let body = {
+        message: {
+          message: model.value.message,
+          image: "",
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(
+        "http://127.0.0.1:8000/conversation/" + route.params.id + "/add/",
+        {
+          method: "POST",
+          body: body,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const myJson = await response.json();
+      console.log("addmessage:", myJson);
+      await getMessage();
+      //location.reload();
+    };
+    return { model, addMessage };
   },
 });
 </script>

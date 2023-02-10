@@ -17,6 +17,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
 ##### AUTH #####
 @app.post("/user/register")
 def Register(newUser: User):
@@ -148,6 +150,28 @@ def CurrentUser(token: Token):
     del user.password
     del user.token
     return user
+
+@app.post("/user/Search", response_model=list[User])
+def SearchUser(search: SearchSettingsUser, token: Token):
+    """
+    Recherche d'une liste d'utilisateurs
+    :param search: Paramètres de recherche
+    :return: 200 si connecté, [User]
+    :return: 401 si mauvais accessToken (ou introuvable)
+    """
+    if(token.accessToken == None):
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    users: list[User] = db.UserSearch(search)
+    for user in users:
+        del user.password
+        del user.token
+    return users
 ################
 
 
@@ -326,7 +350,7 @@ def GetConversations(token: Token):
 
     conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
     return conversations
-@app.post("/conversation/", response_model=list[int])
+@app.post("/conversation/Get/", response_model=list[int])
 def GetConversationMessagesID(conversation: Conversation, token: Token):
     """
     Récupère les messages d'une conversation
@@ -344,11 +368,11 @@ def GetConversationMessagesID(conversation: Conversation, token: Token):
         return Response(status_code=401)
 
     conversation: Conversation = db.ConversationGetByID(conversation.id)
+    if(conversation == None):                                       # Si la conversation n'existe pas
+        return Response(status_code=404)
     if not(conversation.owner.id == token.userID or conversation.guardian.id == token.userID):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
 
-    if(conversation == None):                                       # Si la conversation n'existe pas
-        return Response(status_code=404)
 
     messagesID: list[int] = db.MessageIDsGetByConversationID(conversation.id)
     return messagesID
@@ -370,11 +394,11 @@ def GetConversationMessage(message: PrivateMessage, token: Token):
         return Response(status_code=401)
 
     message: PrivateMessage = db.MessageGetByID(message.id)
+    if(message == None):                                            # Si le message n'existe pas
+        return Response(status_code=404)
     if not(message.conversation.owner.id == token.userID or message.conversation.guardian.id == token.userID):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
 
-    if(message == None):                                            # Si le message n'existe pas
-        return Response(status_code=404)
 
     return message
 

@@ -71,7 +71,6 @@ export default defineComponent({
         password: model.value.password,
       };
       logs = JSON.stringify(logs);
-      console.log(logs);
       const response = await fetch("http://127.0.0.1:8000/user/login", {
         method: "POST",
         body: logs,

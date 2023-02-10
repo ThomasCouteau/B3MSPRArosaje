@@ -350,7 +350,7 @@ class Database:
         """
         conversationsIDs = self.db.execute("SELECT id FROM conversation WHERE ownerID = ? OR guardianID = ?", [userID, userID])
         if len(conversationsIDs) == 0:
-            return None
+            return []
         returnConversations: list[Conversation] = []
         for conversationID in conversationsIDs:
             returnConversations.append(self.ConversationGetByID(conversationID[0]))
@@ -363,7 +363,7 @@ class Database:
         """
         conversation = self.db.execute("SELECT id, ownerID, guardianID FROM conversation WHERE id = ?", [conversationID])
         if len(conversation) == 0:
-            return None
+            return []
         conversation = conversation[0]
         returnConversation: Conversation = Conversation(conversation[0], self.UserGetByID(conversation[1]) if conversation[1] != None else None, self.UserGetByID(conversation[2]) if conversation[2] != None else None)
         if returnConversation.owner != None:
@@ -408,7 +408,7 @@ class Database:
         """
         messages = self.db.execute("SELECT id FROM privateMessage WHERE conversationID = ? ORDER BY id DESC", [conversationID])
         if len(messages) == 0:
-            return None
+            return []
         returnMessagesID: list[int] = []
         for message in messages:
             returnMessagesID.append(message[0])

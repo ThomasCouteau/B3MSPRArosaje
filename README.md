@@ -418,7 +418,7 @@ POST /conversation/add
 ## Récupération les IDs des messages d'une conversation
 ### Request
 ```json
-POST /conversation/
+POST /conversation/Get/
 ```
 ### Body
 ```json

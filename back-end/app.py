@@ -328,7 +328,7 @@ def GetConversations(token: Token):
 
     conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
     return conversations
-@app.post("/conversation/", response_model=list[int])
+@app.post("/conversation/Get/", response_model=list[int])
 def GetConversationMessagesID(conversation: Conversation, token: Token):
     """
     Récupère les messages d'une conversation
@@ -346,11 +346,11 @@ def GetConversationMessagesID(conversation: Conversation, token: Token):
         return Response(status_code=401)
 
     conversation: Conversation = db.ConversationGetByID(conversation.id)
+    if(conversation == None):                                       # Si la conversation n'existe pas
+        return Response(status_code=404)
     if not(conversation.owner.id == token.userID or conversation.guardian.id == token.userID):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
 
-    if(conversation == None):                                       # Si la conversation n'existe pas
-        return Response(status_code=404)
 
     messagesID: list[int] = db.MessageIDsGetByConversationID(conversation.id)
     return messagesID
@@ -372,11 +372,11 @@ def GetConversationMessage(message: PrivateMessage, token: Token):
         return Response(status_code=401)
 
     message: PrivateMessage = db.MessageGetByID(message.id)
+    if(message == None):                                            # Si le message n'existe pas
+        return Response(status_code=404)
     if not(message.conversation.owner.id == token.userID or message.conversation.guardian.id == token.userID):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
 
-    if(message == None):                                            # Si le message n'existe pas
-        return Response(status_code=404)
 
     return message
 

@@ -26,11 +26,17 @@
           <q-card-section class="q-pt-none">
             <div class="text-h6 text-capitalize">{{ plantesActu.name }}</div>
             <div v-if="plantesActu.comments.length != 0">
-              <p>
+              <!-- <p id="commentsList">
                 <span class="text-subtitle2">
                   {{ plantesActu.comments[0].author.pseudo }}:
                 </span>
                 {{ plantesActu.comments[0].message }}
+              </p> -->
+              <p v-for="(comment, index) in plantesActu.comments" :key="index">
+                <span class="text-subtitle2">
+                  {{ comment.author.pseudo }}:
+                </span>
+                {{ comment.message }}
               </p>
             </div>
             <div v-else>
@@ -94,27 +100,6 @@ export default defineComponent({
       this.allKeepPlante = await response.json();
       console.log(this.allKeepPlante);
     };
-
-    // const getCommentKeepPlante = async (plantID) => {
-    //   let body = {
-    //     plante: {
-    //       id: plantID,
-    //     },
-    //     token: {
-    //       accessToken: accessToken,
-    //     },
-    //   };
-    //   body = JSON.stringify(body);
-    //   const response = await fetch("http://127.0.0.1:8000/commentaire/", {
-    //     method: "POST",
-    //     body: body,
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
-    //   this.allCommentKeepPlante = await response.json();
-    //   console.log(this.allCommentKeepPlante);
-    // };
 
     getAllKeepPlante();
   },

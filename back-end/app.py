@@ -150,6 +150,28 @@ def CurrentUser(token: Token):
     del user.password
     del user.token
     return user
+
+@app.post("/user/Search", response_model=list[User])
+def SearchUser(search: SearchSettingsUser, token: Token):
+    """
+    Recherche d'une liste d'utilisateurs
+    :param search: Paramètres de recherche
+    :return: 200 si connecté, [User]
+    :return: 401 si mauvais accessToken (ou introuvable)
+    """
+    if(token.accessToken == None):
+        return Response(status_code=401)
+    if(db.TokenGetByAccessToken(token.accessToken) == None):
+        return Response(status_code=401)
+    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
+        return Response(status_code=401)
+
+    users: list[User] = db.UserSearch(search)
+    for user in users:
+        del user.password
+        del user.token
+    return users
 ################
 
 

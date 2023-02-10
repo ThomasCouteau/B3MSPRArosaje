@@ -85,6 +85,7 @@ class Plante:
     longitude: Union[float, None] = None
     creationDate: Union[datetime.datetime, None] = None
     picture: Union[str , None] = None
+    comments: Union[list['Comment'], None] = None
 ###################
 
 
@@ -110,7 +111,7 @@ class PrivateMessage:
 @dataclass
 class Comment:
     id: Union[int, None] = None
-    plante: Union[Plante, None] = None
+    planteID: Union[int, None] = None
     author: Union[User, None] = None
     message: Union[str, None] = None
     date: Union[datetime.datetime, None] = None
@@ -257,6 +258,8 @@ class Database:
             returnPlantes.guardian.password = None
             returnPlantes.guardian.token = None
             returnPlantes.guardian.lastConnection = None
+        # Get all comments
+        returnPlantes.comments = self.CommentGetByPlanteID(returnPlantes.id)
         return returnPlantes
     def PlanteSearchAll(self, searchSettings: SearchSettings) -> list[Plante]:
         """
@@ -469,7 +472,7 @@ class Database:
         if len(comment) == 0:
             return None
         comment = comment[0]
-        returnComment: Comment = Comment(comment[0], self.PlanteGetByID(comment[1]), self.UserGetByID(comment[2]), comment[3], comment[4])
+        returnComment: Comment = Comment(comment[0], comment[1], self.UserGetByID(comment[2]), comment[3], comment[4])
         returnComment.author.password = None
         returnComment.author.token = None
         returnComment.author.picture = None

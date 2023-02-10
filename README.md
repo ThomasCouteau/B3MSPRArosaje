@@ -478,7 +478,36 @@ POST /conversation/Get/
 ```json
 200 OK
 [
-    int,
+    {
+        "id": int,
+        "conversation": {
+            "id": int,
+            "owner": {
+                "id": int,
+                "userTypeID": int,
+                "pseudo": str,
+                "lastConnection": str,
+                "picture": str
+            },
+            "guardian": {
+                "id": int,
+                "userTypeID": int,
+                "pseudo": str,
+                "lastConnection": str,
+                "picture": str
+            }
+        },
+        "sender": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+            "lastConnection": str,
+            "picture": str
+        },
+        "message": str,
+        "picture": str,
+        "date": str
+    },
     ...
 ]
 

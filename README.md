@@ -118,12 +118,11 @@ POST /user/Search
         "isBotaniste": bool,
         "isGardien": bool,
         "isAdministrator": bool
-        },
-        "token": {
-            "accessToken": str
         }
     },
-    "token":str
+    "token": {
+        "accessToken": str
+    }
 }
 ```
 ## Response

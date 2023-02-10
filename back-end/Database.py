@@ -54,6 +54,12 @@ class SearchSettings:
     latitude: float
     longitude: float
     radius: int
+
+@dataclass
+class SearchSettingsUser:
+    isBotaniste: bool
+    isGardien: bool
+    isAdministrator: bool
 ###########################
 
 
@@ -151,6 +157,45 @@ class Database:
             return None
         date = datetime.datetime.strptime(user[0][4], "%Y-%m-%d %H:%M:%S.%f")
         return User(user[0][0], user[0][1], user[0][2], user[0][3], date, self.TokenGetByUserID(user[0][0]), user[0][5])
+    def UserSearch(self, searchSettings: SearchSettingsUser) -> list[User]:
+        """
+        Recherche un utilisateur
+        :param searchSettings: Paramètres de recherche
+        :return: Liste d'utilisateur
+        """
+        request: str = "SELECT id FROM user WHERE "
+        requestData: list = []
+        if searchSettings.isBotaniste:
+            request += "userTypeID = ?"
+            requestData.append(UserType.BOTANISTE)
+        if searchSettings.isGardien:
+            if len(requestData) > 0:
+                request += " OR "
+                request += "userTypeID = ?"
+            else:
+                request += "userTypeID = ?"
+            requestData.append(UserType.GARDIEN)
+        if searchSettings.isAdministrator:
+            if len(requestData) > 0:
+                request += " OR "
+                request += "userTypeID = ?"
+            else:
+                request += "userTypeID = ?"
+            requestData.append(UserType.ADMIN)
+        if searchSettings.isAdministrator:
+            if len(requestData) > 0:
+                request += " OR "
+                request += "userTypeID = ?"
+            else:
+                request += "userTypeID = ?"
+            requestData.append(UserType.ADMIN)
+
+        usersIDs = self.db.execute(request, requestData)
+        returnUsers: list[User] = []
+        for userID in usersIDs:
+            returnUsers.append(self.UserGetByID(userID[0]))
+        return returnUsers
+
 
     def UserAdd(self, newUser: User) -> None:
         """
@@ -253,11 +298,9 @@ class Database:
         if returnPlantes.owner != None:
             returnPlantes.owner.password = None
             returnPlantes.owner.token = None
-            returnPlantes.owner.lastConnection = None
         if returnPlantes.guardian != None:
             returnPlantes.guardian.password = None
             returnPlantes.guardian.token = None
-            returnPlantes.guardian.lastConnection = None
         # Get all comments
         returnPlantes.comments = self.CommentGetByPlanteID(returnPlantes.id)
         return returnPlantes
@@ -350,7 +393,7 @@ class Database:
         """
         conversationsIDs = self.db.execute("SELECT id FROM conversation WHERE ownerID = ? OR guardianID = ?", [userID, userID])
         if len(conversationsIDs) == 0:
-            return None
+            return []
         returnConversations: list[Conversation] = []
         for conversationID in conversationsIDs:
             returnConversations.append(self.ConversationGetByID(conversationID[0]))
@@ -363,19 +406,15 @@ class Database:
         """
         conversation = self.db.execute("SELECT id, ownerID, guardianID FROM conversation WHERE id = ?", [conversationID])
         if len(conversation) == 0:
-            return None
+            return []
         conversation = conversation[0]
         returnConversation: Conversation = Conversation(conversation[0], self.UserGetByID(conversation[1]) if conversation[1] != None else None, self.UserGetByID(conversation[2]) if conversation[2] != None else None)
         if returnConversation.owner != None:
             returnConversation.owner.password = None
             returnConversation.owner.token = None
-            returnConversation.owner.picture = None
-            returnConversation.owner.lastConnection = None
         if returnConversation.guardian != None:
             returnConversation.guardian.password = None
             returnConversation.guardian.token = None
-            returnConversation.guardian.picture = None
-            returnConversation.guardian.lastConnection = None
         return returnConversation
     def ConversationGetByUsersID(self, ownerID: int, guardianID: int) -> Conversation:
         """
@@ -392,13 +431,9 @@ class Database:
         if returnConversation.owner != None:
             returnConversation.owner.password = None
             returnConversation.owner.token = None
-            returnConversation.owner.picture = None
-            returnConversation.owner.lastConnection = None
         if returnConversation.guardian != None:
             returnConversation.guardian.password = None
             returnConversation.guardian.token = None
-            returnConversation.guardian.picture = None
-            returnConversation.guardian.lastConnection = None
         return returnConversation
     def MessageIDsGetByConversationID(self, conversationID: int) -> list[int]:
         """
@@ -408,7 +443,7 @@ class Database:
         """
         messages = self.db.execute("SELECT id FROM privateMessage WHERE conversationID = ? ORDER BY id DESC", [conversationID])
         if len(messages) == 0:
-            return None
+            return []
         returnMessagesID: list[int] = []
         for message in messages:
             returnMessagesID.append(message[0])
@@ -426,8 +461,6 @@ class Database:
         returnMessage: PrivateMessage = PrivateMessage(message[0], self.ConversationGetByID(message[1]), self.UserGetByID(message[2]), message[3], message[4])
         returnMessage.sender.password = None
         returnMessage.sender.token = None
-        returnMessage.sender.picture = None
-        returnMessage.sender.lastConnection = None
         return returnMessage
 
     def ConversationAdd(self, newConversation: Conversation) -> int:
@@ -475,8 +508,6 @@ class Database:
         returnComment: Comment = Comment(comment[0], comment[1], self.UserGetByID(comment[2]), comment[3], comment[4])
         returnComment.author.password = None
         returnComment.author.token = None
-        returnComment.author.picture = None
-        returnComment.author.lastConnection = None
         return returnComment
 
     def CommentAdd(self, newComment: Comment) -> int:

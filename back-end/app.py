@@ -350,7 +350,7 @@ def GetConversations(token: Token):
 
     conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
     return conversations
-@app.post("/conversation/Get/", response_model=list[int])
+@app.post("/conversation/Get/", response_model=list[PrivateMessage])
 def GetConversationMessagesID(conversation: Conversation, token: Token):
     """
     Récupère les messages d'une conversation
@@ -375,7 +375,10 @@ def GetConversationMessagesID(conversation: Conversation, token: Token):
 
 
     messagesID: list[int] = db.MessageIDsGetByConversationID(conversation.id)
-    return messagesID
+    messages: list[PrivateMessage] = []
+    for messageID in messagesID:
+        messages.append(db.MessageGetByID(messageID))
+    return messages
 @app.post("/conversation/GetMessage/", response_model=PrivateMessage)
 def GetConversationMessage(message: PrivateMessage, token: Token):
     """

@@ -42,11 +42,13 @@ def Login(user: User):
     :return: 200 si connecté, {accessToken: "accessToken", refreshToken: "refreshToken"}
     :return: 401 si mauvais pseudo ou mot de passe
     """
-    if(db.UserGetByPseudo(user.pseudo) == None):                                            # Si le pseudo n'existe pas
+    user = db.UserGetByPseudo(user.pseudo)
+    if(user == None):                                            # Si le pseudo n'existe pas
         return Response(status_code=401)
-    if(not sha256_crypt.verify(user.password, db.UserGetByPseudo(user.pseudo).password)):   # Si le mot de passe est incorrect
+    if(not sha256_crypt.verify(user.password, user.password)):   # Si le mot de passe est incorrect
         return Response(status_code=401)
-    newToken: Token = db.TokenGenerate(db.UserGetByPseudo(user.pseudo))
+    newToken: Token = db.TokenGenerate(user)
+    newToken.userID = User(id=user.id, userTypeID=user.userTypeID)
     return newToken
 
 @app.post("/user/refreshToken", response_model=Token)

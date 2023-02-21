@@ -36,6 +36,10 @@ POST /user/login
 ```json
 200 OK
 {
+    "userID": {
+        "id": int,
+        "userTypeID": int{1=Botaniste, 2=Admin, 3=Gardien}
+    },
     "accessToken": str,
     "refreshToken": str
 }

@@ -7,7 +7,7 @@ from fastapi import FastAPI, status, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-db: Database = Database("ARosaJe_Data.db")
+db: Database = Database()
 
 app.add_middleware(
     CORSMiddleware,
@@ -560,4 +560,4 @@ def DeleteComment(comment: Comment, token: Token):
 ####################
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1')
+    uvicorn.run(app, host='0.0.0.0', port=1418)

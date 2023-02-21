@@ -2,6 +2,7 @@ import sqlite3worker
 import datetime
 from dataclasses import dataclass
 from typing import Union
+import os
 import random
 
 
@@ -128,8 +129,29 @@ class Comment:
 class Database:
     db: sqlite3worker.Sqlite3Worker
 
-    def __init__(self, db_path: str) -> None:
-        self.db = sqlite3worker.Sqlite3Worker(db_path)
+    def __init__(self) -> None:
+        db_path =  "/db/ARosaJe_Data.db"
+        if not os.path.exists(db_path):
+            self.db = sqlite3worker.Sqlite3Worker(db_path)
+            self.db.execute("CREATE TABLE userType (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)")
+            self.db.execute("INSERT INTO userType (name) VALUES ('Botaniste')")
+            self.db.execute("INSERT INTO userType (name) VALUES ('Admin')")
+            self.db.execute("INSERT INTO userType (name) VALUES ('Gardien')")
+
+            self.db.execute("CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT, userTypeID INTEGER, pseudo TEXT, password TEXT, lastConnection TEXT, picture TEXT, FOREIGN KEY (userTypeID) REFERENCES userType(id))")
+            self.db.execute("CREATE TABLE token (id INTEGER PRIMARY KEY AUTOINCREMENT, userID INTEGER, accessToken TEXT, refreshToken TEXT, expire DATETIME, FOREIGN KEY (userID) REFERENCES user(id))")
+            self.db.execute("CREATE TABLE conversation (id INTEGER PRIMARY KEY AUTOINCREMENT, ownerID INTEGER, guardianID INTEGER, FOREIGN KEY (ownerID) REFERENCES user(id), FOREIGN KEY (guardianID) REFERENCES user(id))")
+            self.db.execute("CREATE TABLE privateMessage (id INTEGER PRIMARY KEY AUTOINCREMENT, conversationID INTEGER, senderID INTEGER, message TEXT, picture TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (conversationID) REFERENCES conversation(id), FOREIGN KEY (senderID) REFERENCES user(id))")
+
+            self.db.execute("CREATE TABLE planteStatus (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)")
+            self.db.execute("INSERT INTO planteStatus (name) VALUES ('Disponible')")
+            self.db.execute("INSERT INTO planteStatus (name) VALUES ('Gardé')")
+            self.db.execute("INSERT INTO planteStatus (name) VALUES ('Fini')")
+
+            self.db.execute("CREATE TABLE plante (id INTEGER PRIMARY KEY AUTOINCREMENT, ownerID INTEGER, guardianID INTEGER, name TEXT, statusID INTEGER, latitude REAL, longitude REAL, creationDate DATETIME DEFAULT CURRENT_TIMESTAMP, picture TEXT, FOREIGN KEY (ownerID) REFERENCES user(id), FOREIGN KEY (guardianID) REFERENCES user(id), FOREIGN KEY (statusID) REFERENCES planteStatus(id))")
+            self.db.execute("CREATE TABLE comment (id INTEGER PRIMARY KEY AUTOINCREMENT, planteID INTEGER, authorID INTEGER, message TEXT, date DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (planteID) REFERENCES plante(id), FOREIGN KEY (authorID) REFERENCES user(id))")
+        else:
+            self.db = sqlite3worker.Sqlite3Worker(db_path)
         return
 
     # USER #

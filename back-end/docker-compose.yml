@@ -1,0 +1,19 @@
+services:
+  arosaje:
+    image: arosage_backend:latest
+    container_name: arosaje
+    ports:
+      - 1418:1418
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+    volumes:
+      - /data/db/:/db/
+    restart: unless-stopped
+    labels:
+      - autoheal=true
+networks:
+  default:
+    name: IssouNetwork_Services
+    external: true

@@ -27,10 +27,11 @@ class UserType:
 @dataclass
 class Token:
     id: Union[int, None] = None
-    userID: Union[int, 'User', None] = None
+    userID: Union[int, None] = None
     accessToken: Union[str, None] = None
     refreshToken: Union[str, None] = None
     expire: Union[datetime.datetime, None] = None
+    userTypeID: Union[UserType, int, None] = None
 
 @dataclass
 class User:

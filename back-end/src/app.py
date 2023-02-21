@@ -48,7 +48,7 @@ def Login(user: User):
     if(not sha256_crypt.verify(user.password, user.password)):   # Si le mot de passe est incorrect
         return Response(status_code=401)
     newToken: Token = db.TokenGenerate(user)
-    newToken.userID = User(id=user.id, userTypeID=user.userTypeID)
+    newToken.userTypeID = user.userTypeID
     return newToken
 
 @app.post("/user/refreshToken", response_model=Token)

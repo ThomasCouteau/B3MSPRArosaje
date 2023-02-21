@@ -294,7 +294,7 @@ def UpdatePlanteStatus(plante: Plante, token: Token):
     if(planteToUpdate == None):                                     # Si la plante n'existe pas
         return Response(status_code=404)
     requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
-    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id)):
+    if(requestUser.userTypeID != UserType.ADMIN and requestUser.id != planteToUpdate.owner.id and requestUser.id != planteToUpdate.guardian.id):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur de la plante
 
     planteToUpdate.status = plante.status
@@ -324,7 +324,7 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
     if(requestUser.userTypeID != UserType.GARDIEN and requestUser.userTypeID != UserType.ADMIN):        # Si l'utilisateur est ni gardien ni administrateur
         return Response(status_code=401)
-    if(requestUser.userTypeID == UserType.GARDIEN and planteToUpdate.guardian != None and not(requestUser.id == plante.owner.id)):# Si l'utilisateur est gardien ET que la plante est déjà gardé ET que l'utilisateur n'est pas le propriétaire de la plante
+    if(requestUser.userTypeID == UserType.GARDIEN and planteToUpdate.guardian != None and not(requestUser.id == planteToUpdate.owner.id)):# Si l'utilisateur est gardien ET que la plante est déjà gardé ET que l'utilisateur n'est pas le propriétaire de la plante
         return Response(status_code=401)
     
 

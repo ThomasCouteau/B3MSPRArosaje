@@ -322,10 +322,11 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     if(planteToUpdate == None):                                     # Si la plante n'existe pas
         return Response(status_code=404)
     requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
-    if(requestUser.userTypeID != UserType.ADMIN and requestUser.userTypeID != UserType.GARDIEN):        # Si l'utilisateur est ni gardien ni administrateur
+    if(requestUser.userTypeID != UserType.GARDIEN and requestUser.userTypeID != UserType.ADMIN):        # Si l'utilisateur est ni gardien ni administrateur
         return Response(status_code=401)
-    if(requestUser.userTypeID == UserType.GARDIEN and planteToUpdate.guardian != None):                 # Si l'utilisateur est gardien ET que la plante est déjà gardé
+    if(requestUser.userTypeID == UserType.GARDIEN and planteToUpdate.guardian != None and not(requestUser.id == plante.owner.id)):# Si l'utilisateur est gardien ET que la plante est déjà gardé ET que l'utilisateur n'est pas le propriétaire de la plante
         return Response(status_code=401)
+    
 
     planteToUpdate.guardian = plante.guardian
     db.PlanteUpdate(planteToUpdate)

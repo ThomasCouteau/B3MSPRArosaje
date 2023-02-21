@@ -14,13 +14,23 @@
           <q-list bordered>
             <q-item clickable v-ripple :to="'/conversation/' + conv.id">
               <q-item-section avatar>
-                <q-avatar>
+                <q-avatar v-if="userID != conv.guardian.id">
                   <img :src="conv.guardian.picture" />
                 </q-avatar>
+                <q-avatar v-if="userID == conv.guardian.id">
+                  <img :src="conv.owner.picture" />
+                </q-avatar>
               </q-item-section>
-              <q-item-section class="text-capitalize">{{
-                conv.guardian.pseudo
-              }}</q-item-section>
+              <q-item-section
+                v-if="userID != conv.guardian.id"
+                class="text-capitalize"
+                >{{ conv.guardian.pseudo }}</q-item-section
+              >
+              <q-item-section
+                v-if="userID == conv.guardian.id"
+                class="text-capitalize"
+                >{{ conv.owner.pseudo }}</q-item-section
+              >
             </q-item>
             <q-separator />
           </q-list>
@@ -34,14 +44,7 @@
         <select
           name="Gardien"
           v-model="model.selectedGardien"
-          class="q-ma-md"
-          style="
-            width: 268px;
-            height: 60px;
-            background: #eeeeee;
-            border-radius: 5px;
-            border: none;
-          "
+          class="q-ma-md selected"
           :rules:="[(val) => !!val || 'Champ obligatoire']"
         >
           <option value="null" disabled>Choisir un gardien...</option>
@@ -57,7 +60,7 @@
       <div class="row justify-center">
         <q-btn
           class="q-ma-md"
-          color="primary"
+          color="secondary"
           label="Ecrire"
           @click="createConversationTo()"
         />
@@ -180,7 +183,17 @@ export default defineComponent({
       console.log(myJson);
       location.reload();
     };
-    return { model, createConversationTo };
+    return { model, createConversationTo, userID };
   },
 });
 </script>
+
+<style lang="scss">
+.selected {
+  width: 268px;
+  height: 60px;
+  background: #eeeeee;
+  border-radius: 5px;
+  border: none;
+}
+</style>

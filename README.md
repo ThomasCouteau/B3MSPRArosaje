@@ -72,7 +72,7 @@ POST /user/refreshToken
 }
 ```
 
-## Response
+### Response
 
 ```json
 200 OK
@@ -161,7 +161,7 @@ POST /user/Search
 }
 ```
 
-## Response
+### Response
 
 ```json
 200 OK
@@ -415,7 +415,7 @@ POST /plante/updateStatus/
 {
     "plante":{
         "id": int,
-        "status": int {0=Disponible, 1=Gardée, 2=Terminée}
+        "status": int {1=Disponible, 2=Gardée, 3=Terminée}
     },
     "token": {
         "accessToken": str
@@ -461,7 +461,7 @@ POST /plante/updateGuardian/
 ```json
 200 OK
 
-401 Unauthorized (not owner or admin)
+401 Unauthorized (not owner or admin or guardian already set (when gardian))
 404 Plant not found
 ```
 
@@ -579,7 +579,36 @@ POST /conversation/Get/
 ```json
 200 OK
 [
-    int,
+    {
+        "id": int,
+        "conversation": {
+            "id": int,
+            "owner": {
+                "id": int,
+                "userTypeID": int,
+                "pseudo": str,
+                "lastConnection": str,
+                "picture": str
+            },
+            "guardian": {
+                "id": int,
+                "userTypeID": int,
+                "pseudo": str,
+                "lastConnection": str,
+                "picture": str
+            }
+        },
+        "sender": {
+            "id": int,
+            "userTypeID": int,
+            "pseudo": str,
+            "lastConnection": str,
+            "picture": str
+        },
+        "message": str,
+        "picture": str,
+        "date": str
+    },
     ...
 ]
 

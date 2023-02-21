@@ -22,19 +22,9 @@
           async (val) => (fileToConvert = await convertFileToBase64(val))
         "
       />
-      <!-- <q-input
-        v-model="model.description"
-        filled
-        clearable
-        type="textarea"
-        stack-label
-        label="Description"
-        class="q-ma-md"
-        style="width: 50vw"
-      /> -->
       <q-btn
         class="q-ma-md"
-        color="primary"
+        color="secondary"
         label="Créer"
         @click="createPost"
       />
@@ -44,6 +34,7 @@
 
 <script>
 import { defineComponent, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "CreatePostPage",
@@ -52,10 +43,11 @@ export default defineComponent({
     const model = ref({
       name: "",
       picture: null,
-      // description: "",
       latitude: 0,
       longitude: 0,
     });
+
+    const router = useRouter();
 
     let fileToConvert = null;
 
@@ -130,6 +122,7 @@ export default defineComponent({
       });
       const myJson = await response.json();
       console.log(myJson);
+      router.push("/home");
     };
 
     onMounted(() => {

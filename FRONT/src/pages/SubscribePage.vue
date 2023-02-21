@@ -42,10 +42,14 @@
             />
             <div class="q-gutter-sm">
               <q-radio v-model="model.userTypeID" val="1" label="Botaniste" />
-              <q-radio v-model="model.userTypeID" val="3" label="Gardien" />
+              <q-radio
+                v-model="model.userTypeID"
+                val="3"
+                label="Gardien/Utilisateur"
+              />
             </div>
             <q-btn
-              color="primary"
+              color="secondary"
               label="Créer"
               class="q-mt-md self-center"
               style="width: 150px"
@@ -109,6 +113,12 @@ export default defineComponent({
           "Content-Type": "application/json",
         },
       });
+      const data = await response.json();
+      console.log(data);
+      const userIDType = localStorage.setItem(
+        "userTypeID",
+        model.value.userTypeID
+      );
       route.push("/");
     };
 

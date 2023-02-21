@@ -59,10 +59,6 @@ export default defineComponent({
         popupAnchor: [0, 0], // point from which the popup should open relative to the iconAnchor
       });
 
-      // L.marker([51.5, -0.09], { icon: greenIcon })
-      //   .addTo(map)
-      //   .bindPopup("I am a green leaf.");
-
       for (let index = 0; index < this.allAvailablePlante.length; index++) {
         L.marker(
           [
@@ -72,7 +68,12 @@ export default defineComponent({
           { icon: greenIcon }
         )
           .addTo(map)
-          .bindPopup(this.allAvailablePlante[index].name);
+          .bindPopup(
+            this.allAvailablePlante[index].name +
+              "<br><a href='/post/" +
+              this.allAvailablePlante[index].id +
+              "'>Voir</a>"
+          );
       }
 
       L.tileLayer(

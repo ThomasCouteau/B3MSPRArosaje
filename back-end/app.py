@@ -294,7 +294,7 @@ def UpdatePlanteStatus(plante: Plante, token: Token):
     if(planteToUpdate == None):                                     # Si la plante n'existe pas
         return Response(status_code=404)
     requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
-    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id)):
+    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id) and not(requestUser.id == planteToUpdate.guardian.id)):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur de la plante
 
     planteToUpdate.status = plante.status
@@ -307,7 +307,7 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     Met à jour le gardien d'une plante
     :param plante: Plante à mettre à jour
     :return: 200 Si connecté et administrateur/proprietaire, plante mise à jour
-    :return: 401 Si mauvais accessToken (ou introuvable) ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas l'utilisateur de la plante
+    :return: 401 Si mauvais accessToken (ou introuvable) ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas l'un guardien de la plante ou (si l'utilisateur est un gardien ET que la plante est déjà gardé)
     :return: 404 Si la plante n'existe pas
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
@@ -322,8 +322,11 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     if(planteToUpdate == None):                                     # Si la plante n'existe pas
         return Response(status_code=404)
     requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
-    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id)):
-        return Response(status_code=401)                            # Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur de la plante
+    if(requestUser.userTypeID != UserType.GARDIEN and requestUser.userTypeID != UserType.ADMIN):        # Si l'utilisateur est ni gardien ni administrateur
+        return Response(status_code=401)
+    if(requestUser.userTypeID == UserType.GARDIEN and planteToUpdate.guardian != None and not(requestUser.id == planteToUpdate.owner.id)):# Si l'utilisateur est gardien ET que la plante est déjà gardé ET que l'utilisateur n'est pas le propriétaire de la plante
+        return Response(status_code=401)
+    
 
     planteToUpdate.guardian = plante.guardian
     db.PlanteUpdate(planteToUpdate)
@@ -350,7 +353,7 @@ def GetConversations(token: Token):
 
     conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
     return conversations
-@app.post("/conversation/Get/", response_model=list[int])
+@app.post("/conversation/Get/", response_model=list[PrivateMessage])
 def GetConversationMessagesID(conversation: Conversation, token: Token):
     """
     Récupère les messages d'une conversation
@@ -375,7 +378,10 @@ def GetConversationMessagesID(conversation: Conversation, token: Token):
 
 
     messagesID: list[int] = db.MessageIDsGetByConversationID(conversation.id)
-    return messagesID
+    messages: list[PrivateMessage] = []
+    for messageID in messagesID:
+        messages.append(db.MessageGetByID(messageID))
+    return messages
 @app.post("/conversation/GetMessage/", response_model=PrivateMessage)
 def GetConversationMessage(message: PrivateMessage, token: Token):
     """

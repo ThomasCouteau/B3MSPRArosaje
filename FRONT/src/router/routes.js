@@ -46,11 +46,11 @@ const routes = [
     ],
   },
 
-  // {
-  //   path: "/post/:id",
-  //   component: () => import("layouts/MainLayout.vue"),
-  //   children: [{ path: "", component: () => import("pages/PostPage.vue") }],
-  // },
+  {
+    path: "/post/:id",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/PostPage.vue") }],
+  },
 
   // Always leave this as last one,
   // but you can also remove it

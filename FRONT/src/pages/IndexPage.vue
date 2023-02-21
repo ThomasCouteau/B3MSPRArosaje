@@ -20,8 +20,27 @@
                 plantesActu.owner.pseudo
               }}</q-item-label>
             </q-item-section>
+            <q-btn
+              color="grey-7"
+              round
+              flat
+              icon="more_vert"
+              v-if="userIDType == 2 || userID == plantesActu.owner.id"
+            >
+              <q-menu cover auto-close>
+                <q-list>
+                  <q-item clickable @click="deletePlante(plantesActu.id)">
+                    <q-item-section>Supprimer la plante</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-item>
-          <img :src="plantesActu.picture" />
+
+          <div v-if="plantesActu.picture">
+            <q-img fit="cover" :src="plantesActu.picture" />
+          </div>
+          <img v-else src="/helper/leaf-green.png" />
 
           <q-card-section class="q-pt-none">
             <div class="text-h6 text-capitalize">{{ plantesActu.name }}</div>
@@ -55,7 +74,7 @@
                 <q-btn
                   flat
                   rounded
-                  color="primary"
+                  color="secondary"
                   label="Publier"
                   @click="addCommentToPlante(plantesActu.id)"
                 />
@@ -69,7 +88,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "IndexPage",
@@ -117,6 +136,8 @@ export default defineComponent({
       message: "",
     };
     const accessToken = localStorage.getItem("accessToken");
+    const userIDType = localStorage.getItem("userIDType");
+    const userID = localStorage.getItem("userID");
 
     const addCommentToPlante = async (planteID) => {
       let body = {
@@ -143,18 +164,41 @@ export default defineComponent({
       location.reload();
     };
 
+    const deletePlante = async (planteID) => {
+      let body = {
+        plante: {
+          id: planteID,
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch("http://127.0.0.1:8000/plante/delete/", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      location.reload();
+    };
+
     return {
       model,
       addCommentToPlante,
+      userIDType,
+      userID,
+      deletePlante,
     };
   },
 });
 </script>
 
-<style lang="sass" scoped>
-.my-card
-  width: 100%
-  height: 100%
-  max-height: 120vh
-  max-width: 50vw
+<style lang="scss">
+.my-card {
+  width: 100%;
+  height: 100%;
+  min-width: 310px;
+}
 </style>

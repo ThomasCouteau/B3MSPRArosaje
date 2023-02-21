@@ -3,7 +3,7 @@
     <div class="text-h3 text-center q-ma-md">Votre profil</div>
     <q-card class="my-card">
       <div class="text-center" v-if="model.picture != null">
-        <img class="picture" :src="model.picture" />
+        <q-img fit="cover" :src="model.picture" />
       </div>
 
       <img v-else src="https://cdn.quasar.dev/img/mountains.jpg" />
@@ -70,9 +70,5 @@ export default defineComponent({
 
 .pseudo {
   text-transform: capitalize;
-}
-.picture {
-  width: 300px;
-  height: 400px;
 }
 </style>

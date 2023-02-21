@@ -31,7 +31,7 @@
               ]"
             />
             <q-btn
-              color="primary"
+              color="secondary"
               label="Se connecter"
               class="q-mt-md self-center"
               style="width: 150px"

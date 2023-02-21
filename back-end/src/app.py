@@ -35,18 +35,19 @@ def Register(newUser: User):
     return Response(status_code=201)
 
 @app.post("/user/login", response_model=Token)
-def Login(user: User):
+def Login(loginUser: User):
     """
     Connecte un utilisateur
     :param user: Utilisateur à connecter
     :return: 200 si connecté, {accessToken: "accessToken", refreshToken: "refreshToken"}
-    :return: 401 si mauvais pseudo ou mot de passe
+    :return: 401 si mauvais pseudo 
+    :return: 402 mot de passe
     """
-    user = db.UserGetByPseudo(user.pseudo)
+    user = db.UserGetByPseudo(loginUser.pseudo)
     if(user == None):                                            # Si le pseudo n'existe pas
         return Response(status_code=401)
-    if(not sha256_crypt.verify(user.password, user.password)):   # Si le mot de passe est incorrect
-        return Response(status_code=401)
+    if(not sha256_crypt.verify(loginUser.password, user.password)):   # Si le mot de passe est incorrect
+        return Response(status_code=402)
     newToken: Token = db.TokenGenerate(user)
     newToken.userTypeID = user.userTypeID
     return newToken

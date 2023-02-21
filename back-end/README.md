@@ -44,7 +44,8 @@ POST /user/login
     "refreshToken": str
 }
 
-401 Unauthorized
+401 Unauthorized (mauvais pseudo)
+402 Unauthorized (mauvais mot de passe)
 ```
 
 ## Regénération du token d'accès

@@ -54,7 +54,7 @@ POST /user/refreshToken
     "refreshToken": str
 }
 ```
-## Response
+### Response
 ```json
 200 OK
 {
@@ -125,7 +125,7 @@ POST /user/Search
     }
 }
 ```
-## Response
+### Response
 ```json
 200 OK
 
@@ -338,7 +338,7 @@ POST /plante/updateStatus/
 {
     "plante":{
         "id": int,
-        "status": int {0=Disponible, 1=Gardée, 2=Terminée}
+        "status": int {1=Disponible, 2=Gardée, 3=Terminée}
     },
     "token": {
         "accessToken": str
@@ -376,7 +376,7 @@ POST /plante/updateGuardian/
 ```json
 200 OK
 
-401 Unauthorized (not owner or admin)
+401 Unauthorized (not owner or admin or guardian already set (when gardian))
 404 Plant not found
 ```
 

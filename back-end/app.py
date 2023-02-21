@@ -307,7 +307,7 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     Met à jour le gardien d'une plante
     :param plante: Plante à mettre à jour
     :return: 200 Si connecté et administrateur/proprietaire, plante mise à jour
-    :return: 401 Si mauvais accessToken (ou introuvable) ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas l'utilisateur de la plante
+    :return: 401 Si mauvais accessToken (ou introuvable) ou si l'utilisateur n'est pas administrateur ou si l'utilisateur n'est pas l'un guardien de la plante ou (si l'utilisateur est un gardien ET que la plante est déjà gardé)
     :return: 404 Si la plante n'existe pas
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
@@ -322,8 +322,10 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     if(planteToUpdate == None):                                     # Si la plante n'existe pas
         return Response(status_code=404)
     requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
-    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id)):
-        return Response(status_code=401)                            # Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur de la plante
+    if(requestUser.userTypeID != UserType.ADMIN and requestUser.userTypeID != UserType.GARDIEN):        # Si l'utilisateur est ni gardien ni administrateur
+        return Response(status_code=401)
+    if(requestUser.userTypeID == UserType.GARDIEN and planteToUpdate.guardian != None):                 # Si l'utilisateur est gardien ET que la plante est déjà gardé
+        return Response(status_code=401)
 
     planteToUpdate.guardian = plante.guardian
     db.PlanteUpdate(planteToUpdate)

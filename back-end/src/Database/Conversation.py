@@ -6,7 +6,6 @@ import datetime
 
 # Table utilisée pour les requêtes
 from Database.User import UserTable
-from Database.Conversation import ConversationTable
 
 # Table utilisée pour le typage
 from Database.Tables import Conversation
@@ -15,12 +14,10 @@ from Database.Tables import Conversation
 class ConversationTable:
     db: Client
     userTable: UserTable
-    conversationTable: ConversationTable
 
-    def __init__(self, db: Client, userTable: UserTable, conversationTable: ConversationTable):
+    def __init__(self, db: Client, userTable: UserTable):
         self.db = db
         self.userTable = userTable
-        self.conversationTable = conversationTable
         return
 
     def GetByUserID(self, userID: int) -> list[Conversation]:

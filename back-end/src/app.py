@@ -6,7 +6,7 @@ from fastapi import FastAPI, status, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from Database import tokenTable, userTable, commentTable, planteTable, conversationTable, privateMessageTable
-from Database import User, Comment, Plante, Conversation, PrivateMessage, Token, PlanteStatus, UserType, SearchSettings, SearchSettingsUser
+from Database.Tables import User, Comment, Plante, Conversation, PrivateMessage, Token, PlanteStatus, UserType, SearchSettings, SearchSettingsUser
 
 app = FastAPI()
 

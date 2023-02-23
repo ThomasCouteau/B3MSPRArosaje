@@ -28,7 +28,7 @@ class TokenTable:
         if len(token) == 0:
             return None
         token = token[0]
-        expire: datetime.datetime = datetime.datetime.strptime(token["expire"], "%Y-%m-%d %H:%M:%S.%f")
+        expire: datetime.datetime = datetime.datetime.strptime(token["expire"], "%Y-%m-%dT%H:%M:%S.%f")
         return Token(token["id"], token["userID"], token["accessToken"], token["refreshToken"], expire)
 
     def GetByAccessToken(self, accessToken: str) -> Token:
@@ -41,7 +41,7 @@ class TokenTable:
         if len(token) == 0:
             return None
         token = token[0]
-        expire: datetime.datetime = datetime.datetime.strptime(token["expire"], "%Y-%m-%d %H:%M:%S.%f")
+        expire: datetime.datetime = datetime.datetime.strptime(token["expire"], "%Y-%m-%dT%H:%M:%S.%f")
         return Token(token["id"], token["userID"], token["accessToken"], token["refreshToken"], expire)
 
     def GetByRefreshToken(self, refreshToken: str) -> Token:
@@ -54,7 +54,7 @@ class TokenTable:
         if len(token) == 0:
             return None
         token = token[0]
-        expire: datetime.datetime = datetime.datetime.strptime(token["expire"], "%Y-%m-%d %H:%M:%S.%f")
+        expire: datetime.datetime = datetime.datetime.strptime(token["expire"], "%Y-%m-%dT%H:%M:%S.%f")
         return Token(token["id"], token["userID"], token["accessToken"], token["refreshToken"], expire)
 
 

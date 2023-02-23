@@ -32,7 +32,7 @@ class UserTable:
         if len(user) == 0:
             return None
         user = user[0]
-        lastConnection: datetime.datetime = datetime.datetime.strptime(user["lastConnection"], "%Y-%m-%d %H:%M:%S.%f")
+        lastConnection: datetime.datetime = datetime.datetime.strptime(user["lastConnection"], "%Y-%m-%dT%H:%M:%S.%f")
         return User(user["id"], user["userTypeID"], user["pseudo"], user["password"], lastConnection, self.tokenTable.GetByUserID(user["id"]), user["picture"])
 
     def GetByID(self, id: int) -> User:
@@ -46,7 +46,7 @@ class UserTable:
         if len(user) == 0:
             return None
         user = user[0]
-        lastConnection: datetime.datetime = datetime.datetime.strptime(user["lastConnection"], "%Y-%m-%d %H:%M:%S.%f")
+        lastConnection: datetime.datetime = datetime.datetime.strptime(user["lastConnection"], "%Y-%m-%dT%H:%M:%S.%f")
         return User(user["id"], user["userTypeID"], user["pseudo"], user["password"], lastConnection, self.tokenTable.GetByUserID(user["id"]), user["picture"])
 
     def Search(self, searchSettings: SearchSettingsUser) -> list[User]:

@@ -4,6 +4,7 @@ import uvicorn
 import datetime
 from fastapi import FastAPI, status, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from Database import tokenTable, userTable, commentTable, planteTable, conversationTable, privateMessageTable
 from Database.Tables import User, Comment, Plante, Conversation, PrivateMessage, Token, PlanteStatus, UserType, SearchSettings, SearchSettingsUser
@@ -13,7 +14,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -563,6 +564,40 @@ def DeleteComment(comment: Comment, token: Token):
     commentTable.Delete(comment.id)
     return Response(status_code=200)
 ####################
+
+
+
+# Route pour gérer les requêtes OPTIONS
+@app.options("/user/register")
+@app.options("/user/login")
+@app.options("/user/refreshToken")
+@app.options("/user/logout")
+@app.options("/user/get/{userID}")
+@app.options("/user/delete/")
+@app.options("/user/me")
+@app.options("/user/Search")
+@app.options("/plante/add")
+@app.options("/plante/search")
+@app.options("/plante/")
+@app.options("/plante/delete/")
+@app.options("/plante/updateStatus/")
+@app.options("/plante/updateGuardian/")
+@app.options("/conversation/")
+@app.options("/conversation/Get/")
+@app.options("/conversation/GetMessage/")
+@app.options("/conversation/add/")
+@app.options("/conversation/{conversationID}/add/")
+@app.options("/commentaire/")
+@app.options("/commentaire/{planteID}/add/")
+@app.options("/commentaire/delete/")
+def options():
+    response = JSONResponse(content={})
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=1418)

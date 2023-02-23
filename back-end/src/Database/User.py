@@ -57,17 +57,17 @@ class UserTable:
         """
         returnUsers: list[User] = []
         if searchSettings.isAdministrator:
-            usersIDs: list = self.db.table('user').select("id").eq('userTypeID', searchSettings.isAdministrator).execute().data
+            usersIDs: list = self.db.table('user').select("id").eq('userTypeID', UserType.ADMIN).execute().data
             for userID in usersIDs:
-                returnUsers.append(self.GetByID(userID[0]))
+                returnUsers.append(self.GetByID(userID["id"]))
         if searchSettings.isBotaniste:
-            usersIDs: list = self.db.table('user').select("id").eq('userTypeID', searchSettings.isBotaniste).execute().data
+            usersIDs: list = self.db.table('user').select("id").eq('userTypeID', UserType.BOTANISTE).execute().data
             for userID in usersIDs:
-                returnUsers.append(self.GetByID(userID[0]))
+                returnUsers.append(self.GetByID(userID["id"]))
         if searchSettings.isGardien:
-            usersIDs: list = self.db.table('user').select("id").eq('userTypeID', searchSettings.isGardien).execute().data
+            usersIDs: list = self.db.table('user').select("id").eq('userTypeID', UserType.GARDIEN).execute().data
             for userID in usersIDs:
-                returnUsers.append(self.GetByID(userID[0]))
+                returnUsers.append(self.GetByID(userID["id"]))
         return returnUsers
 
 

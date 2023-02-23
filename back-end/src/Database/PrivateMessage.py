@@ -29,7 +29,7 @@ class PrivateMessageTable:
             :param conversationID: ID de la conversation
             :return: Liste des IDs des messages
         """
-        messages = self.db.table('privateMessage').select("id").eq('conversationID', conversationID).order('id', ascending=False).execute().data
+        messages = self.db.table('privateMessage').select("id").eq('conversationID', conversationID).order('id', desc=True).execute().data
         if len(messages) == 0:
             return []
         returnMessagesID: list[int] = []

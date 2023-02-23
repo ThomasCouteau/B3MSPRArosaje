@@ -30,7 +30,10 @@ class CommentTable:
         comments = self.db.table('comment').select("*").eq('planteID', plantID).order('id', desc=True).execute().data
         if len(comments) == 0:
             return []
-        return comments
+        returnComments: list[Comment] = []
+        for comment in comments:
+            returnComments.append(Comment(comment["id"], comment["planteID"], self.userTable.GetByID(comment["authorID"]), comment["message"], comment["date"]))
+        return returnComments
 
     def GetByID(self, commentID: int) -> Comment:
         """

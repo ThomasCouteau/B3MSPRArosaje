@@ -68,9 +68,9 @@ class TokenTable:
         accessToken = ''.join(random.choices("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=64))
         refreshToken = ''.join(random.choices("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=64))
         if user.token is not None:                                                                                      # Si l'utilisateur a déjà un token
-            self.db.table('token').update({"accessToken": accessToken, "refreshToken": refreshToken, "expire": datetime.datetime.now() + datetime.timedelta(days=1)}).eq('userID', user.id).execute()
+            self.db.table('token').update({"accessToken": accessToken, "refreshToken": refreshToken, "expire": (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S.%f")}).eq('userID', user.id).execute()
         else:                                                                                                           # Si l'utilisateur n'a pas de token
-            self.db.table('token').insert({"userID": user.id, "accessToken": accessToken, "refreshToken": refreshToken, "expire": datetime.datetime.now() + datetime.timedelta(days=1)}).execute()
+            self.db.table('token').insert({"userID": user.id, "accessToken": accessToken, "refreshToken": refreshToken, "expire": (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S.%f")}).execute()
         return self.GetByRefreshToken(refreshToken)
 
     def Refresh(self, token: Token) -> Token:
@@ -81,7 +81,7 @@ class TokenTable:
         """
         accessToken = ''.join(random.choices("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=64))
         refreshToken = ''.join(random.choices("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=64))
-        self.db.table('token').update({"accessToken": accessToken, "refreshToken": refreshToken, "expire": datetime.datetime.now() + datetime.timedelta(days=1)}).eq('refreshToken', token.refreshToken).execute()
+        self.db.table('token').update({"accessToken": accessToken, "refreshToken": refreshToken, "expire": (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S.%f")}).eq('refreshToken', token.refreshToken).execute()
         return self.GetByRefreshToken(refreshToken)
 
     def Delete(self, user: User) -> None:

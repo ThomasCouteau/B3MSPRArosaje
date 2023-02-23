@@ -78,7 +78,7 @@ class UserTable:
             :param user: Utilisateur à ajouter
             :return: Utilisateur ajouté
         """
-        user.id = self.db.table('user').insert({"userTypeID": user.userTypeID, "pseudo": user.pseudo, "password": user.password, "lastConnection": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "picture": user.picture}).execute().data[0]["id"]
+        user.id = self.db.table('user').insert({"userTypeID": user.userTypeID, "pseudo": user.pseudo, "password": user.password, "lastConnection": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"), "picture": user.picture}).execute().data[0]["id"]
         return user
 
     def Delete(self, user: User) -> None:

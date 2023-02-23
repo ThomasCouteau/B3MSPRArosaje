@@ -27,7 +27,7 @@ class CommentTable:
             :param plantID: ID de la plante
             :return: Liste de commentaires
         """
-        comments = self.db.table('comment').select("*").eq('planteID', plantID).order('id', ascending=False).execute().data
+        comments = self.db.table('comment').select("*").eq('planteID', plantID).order('id', desc=True).execute().data
         if len(comments) == 0:
             return []
         return comments
@@ -57,7 +57,7 @@ class CommentTable:
             :return: commentID
         """
         self.db.table('comment').insert([{"planteID": newComment.planteID, "authorID": newComment.author.id, "message": newComment.message}]).execute()
-        return self.db.table('comment').select("id").order('id', ascending=False).limit(1).execute().data[0]["id"]
+        return self.db.table('comment').select("id").order('id', desc=True).limit(1).execute().data[0]["id"]
 
     def Delete(self, commentID: int):
         """

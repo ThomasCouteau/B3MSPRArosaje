@@ -532,7 +532,7 @@ def AddComment(planteID: int, comment: Comment, token: Token):
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
 
-    comment.plante = plante
+    comment.planteID = planteID
     comment.author = userTable.GetByID(token.userID)
     commentID: int = commentTable.Add(comment)
     returnData: dict = {"commentID": commentID}

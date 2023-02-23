@@ -34,15 +34,15 @@ class PlanteTable:
             return None
         plante = plante[0]
         returnPlante = Plante(
-            plante["id"], 
+            plante["id"],
             self.userTable.GetByID(plante["ownerID"]) if plante["ownerID"] != None else None,
             self.userTable.GetByID(plante["guardianID"]) if plante["guardianID"] != None else None,
             plante["name"], 
-            plante["description"], 
+            plante["statusID"], 
             plante["latitude"],
             plante["longitude"], 
-            datetime.datetime.strptime(plante["date"], "%Y-%m-%d %H:%M:%S"),
-            plante["statusID"]
+            datetime.datetime.strptime(plante["creationDate"], "%Y-%m-%dT%H:%M:%S.%f"),
+            plante["picture"]
         )
         if returnPlante.owner != None:
             returnPlante.owner.password = None
@@ -61,10 +61,15 @@ class PlanteTable:
             :return: Liste de plantes
         """
         plantes: list[Plante] = []
-        allPlantes = self.db.table('plante').select("*").order("id", ascending=False).execute().data
+        allPlantes = self.db.table('plante').select("*").order("id", desc=True).execute().data
         for plante in allPlantes:
-            if (searchSettings.availablePlante and plante["statusID"] != PlanteStatus.DISPONIBLE) and (searchSettings.keptPlante and plante["statusID"] != PlanteStatus.GARDE) and (searchSettings.donePlante and plante["statusID"] != PlanteStatus.FINI):
+            if (not(searchSettings.availablePlante) and plante["statusID"] == PlanteStatus.DISPONIBLE):
                 continue
+            if (not(searchSettings.keptPlante) and plante["statusID"] == PlanteStatus.GARDE):
+                continue
+            if (not(searchSettings.donePlante) and plante["statusID"] == PlanteStatus.FINI):
+                continue
+
             if searchSettings.ownerID != -1 and plante["ownerID"] != searchSettings.ownerID:
                 continue
             if searchSettings.guardianID != -1 and plante["guardianID"] != searchSettings.guardianID:

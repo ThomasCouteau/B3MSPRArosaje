@@ -2,3 +2,4 @@ fastapi==0.92.0
 passlib==1.7.4
 sqlite3worker==1.1.7
 uvicorn==0.20.0
+supabase==1.0.0 

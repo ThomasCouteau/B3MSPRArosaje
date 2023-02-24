@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-ma-md">
-    <div class="text-h4 text-center">Rechercher une plante à garder</div>
+    <div class="text-h5 text-center">Rechercher une plante à garder</div>
     <div class="column items-center justify-center q-ma-md">
       <div class="col">
         <SearchPlantMap />
@@ -18,3 +18,9 @@ export default defineComponent({
   components: { SearchPlantMap },
 });
 </script>
+
+<style lang="scss">
+body {
+  overflow: hidden;
+}
+</style>

@@ -13,7 +13,7 @@
       </q-card-section>
       <q-separator />
 
-      <div v-if="userIDType != 1">
+      <div v-if="userTypeID != 1">
         <q-card-actions align="right">
           <q-btn color="secondary" flat label="Garder" @click="keepPlante" />
         </q-card-actions>
@@ -28,6 +28,7 @@
 <script>
 import { defineComponent, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "PostPage",
@@ -45,7 +46,7 @@ export default defineComponent({
 
     const accessToken = localStorage.getItem("accessToken");
     const userID = localStorage.getItem("userID");
-    const userIDType = localStorage.getItem("userIDType");
+    const userTypeID = localStorage.getItem("userTypeID");
 
     const getCurrentPlanteData = async () => {
       let body = {
@@ -53,7 +54,7 @@ export default defineComponent({
         token: { accessToken: accessToken },
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/plante/", {
+      const response = await fetch(API_URL + "/plante/", {
         method: "POST",
         body: body,
         headers: {
@@ -74,16 +75,13 @@ export default defineComponent({
         token: { accessToken: accessToken },
       };
       body = JSON.stringify(body);
-      const response = await fetch(
-        "http://127.0.0.1:8000/plante/updateGuardian/",
-        {
-          method: "POST",
-          body: body,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(API_URL + "/plante/updateGuardian/", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     };
 
     const keepPlante = async () => {
@@ -93,16 +91,13 @@ export default defineComponent({
         token: { accessToken: accessToken },
       };
       body = JSON.stringify(body);
-      const response = await fetch(
-        "http://127.0.0.1:8000/plante/updateStatus/",
-        {
-          method: "POST",
-          body: body,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(API_URL + "/plante/updateStatus/", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       router.push("/home");
     };
 
@@ -112,17 +107,30 @@ export default defineComponent({
       model.value.picture = `data:image/png;base64,${base64Image}`;
     });
 
-    return { model, accessToken, keepPlante, userIDType };
+    return { model, accessToken, keepPlante, userTypeID };
   },
 });
 </script>
 
 <style lang="scss">
-.my-card {
-  width: 100%;
-  height: 100%;
-  max-width: 400px;
-  margin: auto;
+//mobile
+@media screen and (max-width: 600px) {
+  .my-card {
+    width: 80vw;
+    height: 100%;
+    max-width: 400px;
+    margin: auto;
+  }
+}
+
+//desktop
+@media screen and (min-width: 600px) {
+  .my-card {
+    width: 100%;
+    height: 100%;
+    max-width: 400px;
+    margin: auto;
+  }
 }
 
 .name {

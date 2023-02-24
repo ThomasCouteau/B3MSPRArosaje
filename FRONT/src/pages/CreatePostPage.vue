@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div class="text-h3 text-center q-ma-md">Créer un post</div>
+    <div class="text-h5 text-center q-ma-md">Créer un post</div>
     <div class="column items-center q-ma-md">
       <q-input
         stack-label
@@ -8,16 +8,14 @@
         filled
         v-model="model.name"
         label="Nom de la plante"
-        class="q-ma-md"
-        style="width: 50vw"
+        class="q-ma-md my-input"
       />
       <q-file
         filled
         v-model="model.picture"
         label="Photos de la plante"
         stack-label
-        class="q-ma-md"
-        style="width: 50vw"
+        class="q-ma-md my-input"
         @update:model-value="
           async (val) => (fileToConvert = await convertFileToBase64(val))
         "
@@ -35,6 +33,7 @@
 <script>
 import { defineComponent, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "CreatePostPage",
@@ -88,7 +87,7 @@ export default defineComponent({
     const getCurrentUserDatas = async () => {
       let accessToken = { accessToken: localStorage.getItem("accessToken") };
       accessToken = JSON.stringify(accessToken);
-      const response = await fetch("http://127.0.0.1:8000/user/me", {
+      const response = await fetch(API_URL + "/user/me", {
         method: "POST",
         body: accessToken,
         headers: {
@@ -113,7 +112,7 @@ export default defineComponent({
       };
       body = JSON.stringify(body);
       console.log(body);
-      const response = await fetch("http://127.0.0.1:8000/plante/add", {
+      const response = await fetch(API_URL + "/plante/add", {
         method: "POST",
         body: body,
         headers: {
@@ -138,3 +137,19 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+//mobile
+@media screen and (max-width: 600px) {
+  .my-input {
+    width: 75vw;
+  }
+}
+
+//desktop
+@media screen and (min-width: 600px) {
+  .my-input {
+    width: 50vw;
+  }
+}
+</style>

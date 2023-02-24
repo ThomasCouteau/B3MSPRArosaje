@@ -71,6 +71,7 @@
 
 <script>
 import { defineComponent, ref } from "vue";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "MessagesBoxPage",
@@ -90,7 +91,7 @@ export default defineComponent({
         accessToken: accessToken,
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/conversation/", {
+      const response = await fetch(API_URL + "/conversation/", {
         method: "POST",
         body: body,
         headers: {
@@ -113,7 +114,7 @@ export default defineComponent({
         },
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/user/Search", {
+      const response = await fetch(API_URL + "/user/Search", {
         method: "POST",
         body: body,
         headers: {
@@ -136,7 +137,7 @@ export default defineComponent({
         },
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/user/Search", {
+      const response = await fetch(API_URL + "/user/Search", {
         method: "POST",
         body: body,
         headers: {
@@ -172,7 +173,7 @@ export default defineComponent({
         token: { accessToken: accessToken },
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/conversation/add", {
+      const response = await fetch(API_URL + "/conversation/add", {
         method: "POST",
         body: body,
         headers: {

@@ -1,6 +1,12 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-drawer persistent show-if-above bordered>
+    <q-header elevated>
+      <q-toolbar class="xs">
+        <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
+        <q-toolbar-title>A'rosa-je</q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+    <q-drawer persistent show-if-above bordered v-model="drawer">
       <q-list>
         <h6 class="text-h6 q-ml-lg" header>A'rosa-je</h6>
 
@@ -24,6 +30,7 @@
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import { useRouter } from "vue-router";
+import { API_URL } from "../utils/utils.js";
 
 const linksList = [
   {
@@ -67,6 +74,7 @@ export default defineComponent({
 
   setup() {
     const route = useRouter();
+    const drawer = ref(false);
 
     const logout = async () => {
       let tokens = {
@@ -74,7 +82,7 @@ export default defineComponent({
         refreshToken: localStorage.getItem("refreshToken"),
       };
       tokens = JSON.stringify(tokens);
-      const response = await fetch("http://127.0.0.1:8000/user/logout", {
+      const response = await fetch(API_URL + "/user/logout", {
         method: "POST",
         body: tokens,
         headers: {
@@ -91,6 +99,7 @@ export default defineComponent({
     return {
       essentialLinks: linksList,
       logout,
+      drawer,
     };
   },
 });

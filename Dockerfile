@@ -2,7 +2,6 @@
 FROM node:16
 # replace this with your application's default port
 EXPOSE 8080
-FROM ubuntu:22.04
 ENV container=docker
 ENV DEBIAN_FRONTEND=noninteractive
 

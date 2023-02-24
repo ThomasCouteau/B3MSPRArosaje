@@ -578,7 +578,7 @@ POST /conversation/{conversationID}/add/
 {
     "message": {
         "message": str,
-        "image": str (base64)
+        "picture": str (base64)
     },
     "token": {
         "accessToken": str

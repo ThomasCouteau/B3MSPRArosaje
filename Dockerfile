@@ -10,7 +10,8 @@ RUN apt update && apt install -y npm nodejs
 COPY FRONT /home/node/app
 WORKDIR /home/node/app
 
-
 RUN npm install
+RUN npm run start
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=20s --retries=3 CMD curl -f http://localhost:8080/ || exit 1
+FROM nginx
+COPY --from=0 /home/node/app/dist/spa /usr/share/nginx/html

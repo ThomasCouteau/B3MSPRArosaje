@@ -1,0 +1,20 @@
+services:
+  arosaje-front:
+    image: arosaje_front:latest
+    container_name: arosaje-front
+    ports:
+      - 8080:8080
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+
+    restart: unless-stopped
+    labels:
+      - autoheal=true
+    depends_on:
+      - arosaje
+netorks:
+  default:
+    external: true
+    name: IssouNetwork_Services

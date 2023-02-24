@@ -1,20 +1,20 @@
 services:
   arosaje-front:
-    image: arosaje_front:latest
-    container_name: arosaje-front
-    ports:
-      - 8080:8080
+    image: "node:8"
+    user: "node"
+    working_dir: /home/node/app
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Paris
+      - NODE_ENV=production
+    expose:
+      - "8080"
 
     restart: unless-stopped
     labels:
       - autoheal=true
     depends_on:
       - arosaje
-netorks:
+    command: "npm start"
+networks:
   default:
     external: true
     name: IssouNetwork_Services

@@ -54,6 +54,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "LoginPage",
@@ -71,21 +72,26 @@ export default defineComponent({
         password: model.value.password,
       };
       logs = JSON.stringify(logs);
-      const response = await fetch("http://127.0.0.1:8000/user/login", {
+      const response = await fetch(API_URL + "/user/login", {
         method: "POST",
         body: logs,
         headers: {
           "Content-Type": "application/json",
         },
       });
-      const myJson = await response.json();
-      console.log(myJson);
+      const myResponse = await response;
 
       if (response.status == "200") {
+        const myJson = await myResponse.json();
+        console.log(myJson);
         localStorage.setItem("accessToken", myJson.accessToken);
         localStorage.setItem("refreshToken", myJson.refreshToken);
         localStorage.setItem("userID", myJson.userID);
+        localStorage.setItem("userTypeID", myJson.userTypeID);
         route.push("/home");
+      }
+      if (response.status == "401") {
+        alert("Mauvais login ou mot de passe");
       }
     };
 

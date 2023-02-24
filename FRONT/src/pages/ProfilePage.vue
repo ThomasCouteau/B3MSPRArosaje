@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div class="text-h3 text-center q-ma-md">Votre profil</div>
+    <div class="text-h5 text-center q-ma-md">Votre profil</div>
     <q-card class="my-card">
       <div class="text-center" v-if="model.picture != null">
         <q-img fit="cover" :src="model.picture" />
@@ -18,6 +18,7 @@
 
 <script>
 import { defineComponent, ref, onMounted } from "vue";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "ProfilePage",
@@ -32,7 +33,7 @@ export default defineComponent({
     const getCurrentUserDatas = async () => {
       let accessToken = { accessToken: localStorage.getItem("accessToken") };
       accessToken = JSON.stringify(accessToken);
-      const response = await fetch("http://127.0.0.1:8000/user/me", {
+      const response = await fetch(API_URL + "/user/me", {
         method: "POST",
         body: accessToken,
         headers: {
@@ -61,11 +62,24 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.my-card {
-  width: 100%;
-  height: 100%;
-  max-width: 400px;
-  margin: auto;
+//desktop
+@media screen and (min-width: 600px) {
+  .my-card {
+    width: 100%;
+    height: 100%;
+    max-width: 400px;
+    margin: auto;
+  }
+}
+
+//mobile
+@media screen and (max-width: 600px) {
+  .my-card {
+    width: 80vw;
+    height: 100%;
+    max-width: 400px;
+    margin: auto;
+  }
 }
 
 .pseudo {

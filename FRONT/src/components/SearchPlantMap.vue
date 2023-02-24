@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div id="map" style="width: 70vw; height: 85vh; z-index: 1"></div>
+    <div id="map"></div>
   </q-page>
 </template>
 
@@ -8,6 +8,7 @@
 import { defineComponent, onMounted } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "SearchPlantMap",
@@ -36,7 +37,7 @@ export default defineComponent({
         },
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/plante/search", {
+      const response = await fetch(API_URL + "/plante/search", {
         method: "POST",
         body: body,
         headers: {
@@ -96,3 +97,20 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+@media screen and (max-width: 600px) {
+  #map {
+    height: 85vh;
+    width: 85vw;
+    z-index: 1;
+  }
+}
+@media screen and (min-width: 600px) {
+  #map {
+    height: 85vh;
+    width: 70vw;
+    z-index: 1;
+  }
+}
+</style>

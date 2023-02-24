@@ -1,9 +1,9 @@
 <template>
   <q-page class="q-ma-md">
-    <div class="text-h4 text-center">Fil d'actualité</div>
+    <div class="text-h5 text-center">Fil d'actualité</div>
     <div class="column items-center justify-center q-ma-md">
       <div
-        class="col q-ma-md"
+        class="col q-mt-lg"
         :key="index"
         v-for="(plantesActu, index) in allKeepPlante"
       >
@@ -25,7 +25,7 @@
               round
               flat
               icon="more_vert"
-              v-if="userIDType == 2 || userID == plantesActu.owner.id"
+              v-if="userTypeID == 2 || userID == plantesActu.owner.id"
             >
               <q-menu cover auto-close>
                 <q-list>
@@ -62,15 +62,15 @@
             </div>
 
             <q-separator />
-            <div class="row items-center">
-              <div class="col-8">
+            <div class="row items-center justify-between">
+              <div class="">
                 <q-input
                   borderless
                   v-model="model.message"
                   label="Commentaire"
                 />
               </div>
-              <div class="col-2">
+              <div class="float-right">
                 <q-btn
                   flat
                   rounded
@@ -89,6 +89,7 @@
 
 <script>
 import { defineComponent } from "vue";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "IndexPage",
@@ -118,7 +119,7 @@ export default defineComponent({
         },
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/plante/search", {
+      const response = await fetch(API_URL + "/plante/search", {
         method: "POST",
         body: body,
         headers: {
@@ -136,7 +137,7 @@ export default defineComponent({
       message: "",
     };
     const accessToken = localStorage.getItem("accessToken");
-    const userIDType = localStorage.getItem("userIDType");
+    const userTypeID = localStorage.getItem("userTypeID");
     const userID = localStorage.getItem("userID");
 
     const addCommentToPlante = async (planteID) => {
@@ -150,7 +151,7 @@ export default defineComponent({
       };
       body = JSON.stringify(body);
       const response = await fetch(
-        "http://127.0.0.1:8000/commentaire/" + planteID + "/add/",
+        API_URL + "/commentaire/" + planteID + "/add/",
         {
           method: "POST",
           body: body,
@@ -174,7 +175,7 @@ export default defineComponent({
         },
       };
       body = JSON.stringify(body);
-      const response = await fetch("http://127.0.0.1:8000/plante/delete/", {
+      const response = await fetch(API_URL + "/plante/delete/", {
         method: "POST",
         body: body,
         headers: {
@@ -187,7 +188,7 @@ export default defineComponent({
     return {
       model,
       addCommentToPlante,
-      userIDType,
+      userTypeID,
       userID,
       deletePlante,
     };
@@ -196,9 +197,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.my-card {
-  width: 100%;
-  height: 100%;
-  min-width: 310px;
+//mobile
+@media screen and (max-width: 600px) {
+  .my-card {
+    width: 85vw;
+  }
+}
+
+//desktop
+@media screen and (min-width: 600px) {
+  .my-card {
+    width: 50vw;
+  }
 }
 </style>

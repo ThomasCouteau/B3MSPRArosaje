@@ -59,12 +59,16 @@
         </div>
       </q-card-section>
     </q-card>
+    <div class="column self-end q-ma-md">
+      <q-btn color="primary" label="Retour" href="/" />
+    </div>
   </q-page>
 </template>
 
 <script>
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
+import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "SubscribePage",
@@ -106,19 +110,13 @@ export default defineComponent({
       };
       body = JSON.stringify(body);
       console.log(body);
-      const response = await fetch("http://127.0.0.1:8000/user/register", {
+      const response = await fetch(API_URL + "/user/register", {
         method: "POST",
         body: body,
         headers: {
           "Content-Type": "application/json",
         },
       });
-      const data = await response.json();
-      console.log(data);
-      const userIDType = localStorage.setItem(
-        "userTypeID",
-        model.value.userTypeID
-      );
       route.push("/");
     };
 

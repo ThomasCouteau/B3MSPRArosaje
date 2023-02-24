@@ -14,10 +14,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[],
+    allow_origins=["https://arosaje.ibsolutions.cloud"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["POST", "OPTIONS"],
+    allow_headers=["*"]
 )
 
 
@@ -592,8 +592,8 @@ def DeleteComment(comment: Comment, token: Token):
 @app.options("/commentaire/delete/")
 def options():
     response = JSONResponse(content={})
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Origin"] = "https://arosaje.ibsolutions.cloud"
+    response.headers["Access-Control-Allow-Methods"] = ["POST", "OPTIONS"]
     response.headers["Access-Control-Allow-Headers"] = "*"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     return response

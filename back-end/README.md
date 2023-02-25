@@ -208,7 +208,8 @@ POST /plant/add
   "plante": {
     "name": str,
     "latitude": float,
-    "longitude": float
+    "longitude": float,
+    "picture": "string"
   },
   "token": {
     "accessToken": str

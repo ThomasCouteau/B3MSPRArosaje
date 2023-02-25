@@ -173,13 +173,16 @@ export default defineComponent({
         token: { accessToken: accessToken },
       };
       body = JSON.stringify(body);
-      const response = await fetch(API_URL + "/conversation/add", {
-        method: "POST",
-        body: body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "https://arosaje-api.ibsolutions.cloud/conversation/add",
+        {
+          method: "POST",
+          body: body,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const myJson = await response.json();
       console.log(myJson);
       location.reload();

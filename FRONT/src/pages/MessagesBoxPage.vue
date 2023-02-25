@@ -174,7 +174,7 @@ export default defineComponent({
       };
       body = JSON.stringify(body);
       const response = await fetch(
-        "https://arosaje-api.ibsolutions.cloud/conversation/adds/",
+        "https://arosaje-api.ibsolutions.cloud/conversation/add/",
         {
           method: "POST",
           body: body,

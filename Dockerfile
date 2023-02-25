@@ -13,5 +13,5 @@ WORKDIR /home/node/app
 RUN npm install
 RUN npm run start
 
-FROM nginx
-COPY --from=0 /home/node/app/dist/spa /usr/share/nginx/html
+#FROM nginx
+#COPY --from=0 /home/node/app/dist/spa /usr/share/nginx/html

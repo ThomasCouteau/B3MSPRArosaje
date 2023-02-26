@@ -31,6 +31,8 @@ def Register(newUser: User):
     :return: 201 si ajouté
     :return: 409 si le pseudo déjà présent
     """
+    newUser.pseudo = newUser.pseudo.strip()
+    newUser.password = newUser.password.strip()
     if(userTable.GetByPseudo(newUser.pseudo) != None):
         return Response(status_code=409)
     newUser.password = sha256_crypt.encrypt(newUser.password)
@@ -46,6 +48,8 @@ def Login(loginUser: User):
     :return: 401 si mauvais pseudo 
     :return: 402 mot de passe
     """
+    loginUser.pseudo = loginUser.pseudo.strip()
+    loginUser.password = loginUser.password.strip()
     user = userTable.GetByPseudo(loginUser.pseudo)
     if(user == None):                                            # Si le pseudo n'existe pas
         return Response(status_code=401)

@@ -106,6 +106,7 @@ class PlanteTable:
             :param plante: Plante à supprimer
             :return: None
         """
+        self.db.table('comment').delete().eq('planteID', plante.id).execute()
         self.db.table('plante').delete().eq('id', plante.id).execute()
         return
 

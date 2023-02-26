@@ -102,3 +102,13 @@ class ConversationTable:
             }
         ]).execute().data
         return id[0]["id"]
+    
+    def Delete(self, conversationID: int) -> None:
+        """
+            Supprime une conversation de la base de données
+            :param conversationID: ID de la conversation
+            :return: True si la conversation a été supprimée
+        """
+        self.db.table('privateMessage').delete().eq('conversationID', conversationID).execute()
+        self.db.table('conversation').delete().eq('id', conversationID).execute()
+        return

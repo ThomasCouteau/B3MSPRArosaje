@@ -86,6 +86,13 @@ class UserTable:
             Supprime un utilisateur
             :param user: Utilisateur à supprimer
         """
+        self.db.table('token').delete().eq('userID', user.id).execute()
+        self.db.table('privateMessage').delete().eq('senderID', user.id).execute()
+        self.db.table('conversation').delete().eq('ownerID', user.id).execute()
+        self.db.table('conversation').delete().eq('guardianID', user.id).execute()
+        self.db.table('comment').delete().eq('authorID', user.id).execute()
+        self.db.table('plante').delete().eq('ownerID', user.id).execute()
+        self.db.table('plante').delete().eq('guardianID', user.id).execute()
         self.db.table('user').delete().eq('id', user.id).execute()
         return
         

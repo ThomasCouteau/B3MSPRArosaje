@@ -5,20 +5,30 @@
 </template>
 
 <script>
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onMounted, onBeforeMount } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "SearchPlantMap",
-  data() {
-    return {
-      allAvailablePlante: [],
-    };
-  },
-  mounted() {
+  setup() {
     const accessToken = localStorage.getItem("accessToken");
+    let allAvailablePlante = [];
+    let userPosition = {};
+
+    const getPositionOfUser = async () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          userPosition = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+        });
+      } else {
+        console.log("geolocalisation not supported");
+      }
+    };
 
     const getAllAvailablePlante = async () => {
       let body = {
@@ -44,13 +54,18 @@ export default defineComponent({
           "Content-Type": "application/json",
         },
       });
-      this.allAvailablePlante = await response.json();
-      console.log(this.allAvailablePlante);
+      allAvailablePlante = await response.json();
+      console.log(allAvailablePlante);
     };
 
     const initializeMapAndLocator = async () => {
       await getAllAvailablePlante();
-      var map = L.map("map").setView([48.856614, 2.3522219], 6);
+      await getPositionOfUser();
+      console.log(userPosition);
+      var map = L.map("map").setView(
+        [userPosition.latitude, userPosition.longitude],
+        9
+      );
 
       var greenIcon = L.icon({
         iconUrl: "helper/leaf-green.png",
@@ -60,19 +75,19 @@ export default defineComponent({
         popupAnchor: [0, 0], // point from which the popup should open relative to the iconAnchor
       });
 
-      for (let index = 0; index < this.allAvailablePlante.length; index++) {
+      for (let index = 0; index < allAvailablePlante.length; index++) {
         L.marker(
           [
-            this.allAvailablePlante[index].latitude,
-            this.allAvailablePlante[index].longitude,
+            allAvailablePlante[index].latitude,
+            allAvailablePlante[index].longitude,
           ],
           { icon: greenIcon }
         )
           .addTo(map)
           .bindPopup(
-            this.allAvailablePlante[index].name +
+            allAvailablePlante[index].name +
               "<br><a href='/post/" +
-              this.allAvailablePlante[index].id +
+              allAvailablePlante[index].id +
               "'>Voir</a>"
           );
       }
@@ -93,7 +108,14 @@ export default defineComponent({
       ).addTo(map);
     };
 
-    initializeMapAndLocator();
+    onBeforeMount(() => {
+      getPositionOfUser();
+      initializeMapAndLocator();
+    });
+
+    return {
+      initializeMapAndLocator,
+    };
   },
 });
 </script>

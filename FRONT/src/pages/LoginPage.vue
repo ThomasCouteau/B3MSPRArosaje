@@ -52,19 +52,44 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { API_URL } from "../utils/utils.js";
+import { useQuasar } from "quasar";
+import { Dialog } from "quasar";
 
 export default defineComponent({
   name: "LoginPage",
   components: {},
   setup() {
     const route = useRouter();
+    const $q = useQuasar();
     const model = ref({
       pseudo: "",
       password: "",
     });
+
+    const cookiesIsAccepted = localStorage.getItem("cookiesIsAccepted");
+
+    const confirmCookies = () => {
+      if (cookiesIsAccepted) {
+        return;
+      }
+      if (!cookiesIsAccepted) {
+        $q.dialog({
+          title: "Confirmer l'utilisation des cookies",
+          message:
+            "En poursuivant votre navigation sur ce site, vous acceptez l'utilisation de cookies pour vous proposer des services adaptés à vos centres d'intérêts.",
+          cancel: false,
+          persistent: true,
+        })
+          .onOk(() => {
+            let cookies = localStorage.setItem("cookiesIsAccepted", true);
+          })
+          .onOk(() => {})
+          .onDismiss(() => {});
+      }
+    };
 
     const loginUser = async () => {
       let logs = {
@@ -94,6 +119,10 @@ export default defineComponent({
         alert("Mauvais login ou mot de passe");
       }
     };
+
+    onMounted(() => {
+      confirmCookies();
+    });
 
     return {
       model,

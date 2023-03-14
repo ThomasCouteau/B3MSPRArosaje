@@ -13,9 +13,10 @@
         <div class="text-subtitle2">{{ model.role }}</div>
       </q-card-section>
     </q-card>
-    <div class="column q-ma-md">
+    <div class="column q-ma-md" v-if="allPlanteOfUser.length > 0">
+      <div class="text-h5 text-center q-mt-md">Mes plantes</div>
       <div
-        class="col q-mt-lg"
+        class="col q-mt-md"
         :key="index"
         v-for="(planteUser, index) in allPlanteOfUser"
       >
@@ -63,6 +64,40 @@
         </q-card>
       </div>
     </div>
+    <br />
+    <div class="column q-ma-md" v-if="keepPlantes.length > 0">
+      <div class="text-h5 text-center q-mt-md">Les plantes que je garde</div>
+      <div
+        class="col q-mt-md"
+        :key="index"
+        v-for="(keepPlante, index) in keepPlantes"
+      >
+        <q-card class="my-card">
+          <q-item>
+            <q-item-section avatar>
+              <q-avatar>
+                <img :src="keepPlante.owner.picture" />
+              </q-avatar>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label class="text-capitalize">{{
+                keepPlante.owner.pseudo
+              }}</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <div v-if="keepPlante.picture">
+            <q-img fit="cover" :src="keepPlante.picture" />
+          </div>
+          <img v-else src="/helper/leaf-green.png" />
+          <q-card-section class="q-pt-none">
+            <div class="text-h6 text-capitalize">{{ keepPlante.name }}</div>
+            <q-separator />
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -75,6 +110,7 @@ export default defineComponent({
   data() {
     return {
       allPlanteOfUser: [],
+      keepPlantes: [],
     };
   },
   setup() {
@@ -166,7 +202,37 @@ export default defineComponent({
       this.allPlanteOfUser = await response.json();
       console.log(this.allPlanteOfUser);
     };
+
+    const getKeepPlantesOfUser = async () => {
+      let body = {
+        searchSetting: {
+          availablePlante: false, // Si la plante est disponible
+          keptPlante: true, // Si la plante est gardée
+          donePlante: false, // Si la plante est terminée
+          ownerID: -1, // ID du propriétaire (-1 = tous)
+          guardianID: userID, // ID du gardien (-1 = tous)
+          latitude: -1, // Latitude du centre de la zone de recherche (-1 = tous)
+          longitude: -1, // Longitude du centre de la zone de recherche (-1 = tous)
+          radius: -1, // Rayon de la zone de recherche (-1 = tous)
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(API_URL + "/plante/search", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      this.keepPlantes = await response.json();
+      console.log(this.keepPlantes);
+    };
+
     getAllPlanteOfUser();
+    getKeepPlantesOfUser();
   },
 });
 </script>

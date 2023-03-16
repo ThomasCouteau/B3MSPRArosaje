@@ -11,6 +11,12 @@
       <q-card-section>
         <div class="text-h6 pseudo">{{ model.pseudo }}</div>
         <div class="text-subtitle2">{{ model.role }}</div>
+        <q-separator />
+        <div class="text-subtitle2">
+          <a target="_blank" class="my-datas" :href="API_URL + '/file/rgpd/'"
+            >Traitement de mes données.</a
+          >
+        </div>
       </q-card-section>
     </q-card>
     <div class="column q-ma-md" v-if="allPlanteOfUser.length > 0">
@@ -169,7 +175,7 @@ export default defineComponent({
       // model.value.picture = `data:image/png;base64,${base64Image}`;
     });
 
-    return { model, deletePlante, userID };
+    return { model, deletePlante, userID, API_URL };
   },
   mounted() {
     const userID = localStorage.getItem("userID");
@@ -260,5 +266,9 @@ export default defineComponent({
 
 .pseudo {
   text-transform: capitalize;
+}
+.my-datas {
+  color: $info;
+  text-decoration: none;
 }
 </style>

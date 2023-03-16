@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://arosaje.ibsolutions.cloud", "localhost:8080"],
+    allow_origins=["https://arosaje.ibsolutions.cloud", "https://localhost:8080"],
     allow_credentials=True,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"]
@@ -611,6 +611,8 @@ def GetTraitement():
 @app.options("/commentaire/")
 @app.options("/commentaire/{planteID}/add/")
 @app.options("/commentaire/delete/")
+@app.options("/file/CGU/")
+@app.options("/file/rgpd/")
 def options():
     response = JSONResponse(content={})
     response.headers["Access-Control-Allow-Origin"] = "https://arosaje.ibsolutions.cloud"

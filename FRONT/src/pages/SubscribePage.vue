@@ -48,7 +48,18 @@
                 label="Gardien/Utilisateur"
               />
             </div>
+            <div class="row items-center">
+              <q-checkbox class="col-4" v-model="accepted" />
+              <span class="col-4 q-ma-sm text-no-wrap">
+                Accepter la
+                <a target="_blank" class="my-cgu" :href="API_URL + '/file/CGU/'"
+                  >CGU</a
+                >
+              </span>
+            </div>
+
             <q-btn
+              :disable="!accepted"
               color="secondary"
               label="Créer"
               class="q-mt-md self-center"
@@ -81,6 +92,8 @@ export default defineComponent({
       userTypeID: "",
       picture: null,
     });
+
+    let accepted = ref(false);
 
     let fileToConvert = null;
 
@@ -124,6 +137,8 @@ export default defineComponent({
       model,
       createUser,
       convertFileToBase64,
+      accepted,
+      API_URL,
     };
   },
 });
@@ -140,5 +155,10 @@ img {
 .subscribe {
   text-decoration: none;
   color: $primary;
+}
+
+.my-cgu {
+  color: $info;
+  text-decoration: none;
 }
 </style>

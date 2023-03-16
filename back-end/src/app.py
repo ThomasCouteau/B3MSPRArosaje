@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://arosaje.ibsolutions.cloud", "https://localhost:8080"],
+    allow_origins=["https://arosaje.ibsolutions.cloud", "http://localhost:8080"],
     allow_credentials=True,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"]

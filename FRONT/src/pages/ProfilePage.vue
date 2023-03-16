@@ -1,28 +1,38 @@
 <template>
   <q-page>
-    <div class="text-h5 text-center q-ma-md">Votre profil</div>
-    <q-card class="my-card">
-      <div class="text-center" v-if="model.picture != null">
-        <q-img fit="cover" :src="model.picture" />
+    <div class="profile-container q-ma-md">
+      <div class="profile-picture">
+        <q-avatar size="150px" class="fit-content">
+          <q-img fit="cover" :src="model.picture" />
+        </q-avatar>
       </div>
-
-      <img v-else src="https://cdn.quasar.dev/img/mountains.jpg" />
-
-      <q-card-section>
-        <div class="text-h6 pseudo">{{ model.pseudo }}</div>
-        <div class="text-subtitle2">{{ model.role }}</div>
-        <q-separator />
-        <div class="text-subtitle2">
-          <a target="_blank" class="my-datas" :href="API_URL + '/file/rgpd/'"
+      <div class="profile-details">
+        <div class="profile-name">{{ model.pseudo }}</div>
+        <div class="profile-description">{{ model.role }}</div>
+        <div class="profile-link">
+          <a target="_blank" :href="API_URL + '/file/rgpd/'"
             >Traitement de mes données.</a
           >
         </div>
-      </q-card-section>
-    </q-card>
-    <div class="column q-ma-md" v-if="allPlanteOfUser.length > 0">
-      <div class="text-h5 text-center q-mt-md">Mes plantes</div>
+      </div>
+    </div>
+    <q-separator />
+    <q-tabs
+      v-model="tab"
+      inline-label
+      switch-indicator
+      align="justify"
+      indicator-color="primary"
+    >
+      <q-tab name="my-plants" icon="yard" label="Mes plantes" />
+      <q-tab name="keep" icon="fire_extinguisher" label="Je garde" />
+    </q-tabs>
+    <div
+      class="column q-ma-md"
+      v-if="tab === 'my-plants' && allPlanteOfUser.length > 0"
+    >
       <div
-        class="col q-mt-md"
+        class="col q-ma-md"
         :key="index"
         v-for="(planteUser, index) in allPlanteOfUser"
       >
@@ -70,11 +80,9 @@
         </q-card>
       </div>
     </div>
-    <br />
-    <div class="column q-ma-md" v-if="keepPlantes.length > 0">
-      <div class="text-h5 text-center q-mt-md">Les plantes que je garde</div>
+    <div class="column q-ma-md" v-if="tab === 'keep' && keepPlantes.length > 0">
       <div
-        class="col q-mt-md"
+        class="col q-ma-md"
         :key="index"
         v-for="(keepPlante, index) in keepPlantes"
       >
@@ -129,6 +137,8 @@ export default defineComponent({
     const accessToken = localStorage.getItem("accessToken");
     const userID = localStorage.getItem("userID");
 
+    let tab = ref("my-plants");
+
     const getCurrentUserDatas = async () => {
       let body = { accessToken: accessToken };
       body = JSON.stringify(body);
@@ -175,7 +185,7 @@ export default defineComponent({
       // model.value.picture = `data:image/png;base64,${base64Image}`;
     });
 
-    return { model, deletePlante, userID, API_URL };
+    return { model, deletePlante, userID, API_URL, tab };
   },
   mounted() {
     const userID = localStorage.getItem("userID");
@@ -270,5 +280,43 @@ export default defineComponent({
 .my-datas {
   color: $info;
   text-decoration: none;
+}
+
+.profile-container {
+  display: flex;
+  align-items: center;
+}
+
+.profile-picture {
+  margin-right: 32px;
+}
+
+.profile-details {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.profile-description {
+  font-size: 18px;
+  color: #8e8e8e;
+  margin-top: 4px;
+}
+
+.profile-link {
+  margin-top: 16px;
+}
+
+.profile-link a {
+  color: $info;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.profile-link a:hover {
+  text-decoration: underline;
 }
 </style>

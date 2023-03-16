@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center subscribe-bg">
     <q-card flat bordered class="my-card" style="width: 310px">
       <q-card-section>
         <div class="text-center">
@@ -147,7 +147,6 @@ export default defineComponent({
 <style lang="scss">
 .my-card {
   max-width: 310px;
-  margin: auto;
 }
 img {
   pointer-events: none;
@@ -160,5 +159,25 @@ img {
 .my-cgu {
   color: $info;
   text-decoration: none;
+}
+
+//mobile
+@media screen and (max-width: 600px) {
+  .subscribe-bg {
+    background-image: url("/helper/subscribe.svg");
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+  }
+}
+
+//desktop
+@media screen and (min-width: 600px) {
+  .subscribe-bg {
+    background-image: url("/helper/subscribe.svg");
+    background-size: contain;
+    background-position: right;
+    background-repeat: no-repeat;
+  }
 }
 </style>

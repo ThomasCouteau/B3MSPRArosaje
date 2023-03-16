@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center login">
     <q-card flat bordered class="my-card">
       <q-card-section>
         <div class="text-center">
@@ -143,5 +143,25 @@ img {
 .subscribe {
   text-decoration: none;
   color: $primary;
+}
+
+//mobile
+@media screen and (max-width: 600px) {
+  .login {
+    background-image: url("/helper/blooming.svg");
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+  }
+}
+
+//desktop
+@media screen and (min-width: 600px) {
+  .login {
+    background-image: url("/helper/blooming.svg");
+    background-size: contain;
+    background-position: right;
+    background-repeat: no-repeat;
+  }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
-  <q-page class="q-ma-none">
+  <q-page class="q-ma-none msgbox-bg">
     <div>
-      <q-toolbar class="bg-positive q-ma-none">
+      <q-toolbar class="bg-secondary q-ma-none">
         <q-toolbar-title class="text-white"> Messagerie </q-toolbar-title>
       </q-toolbar>
       <div v-if="allConversation.length != 0">
@@ -199,5 +199,11 @@ export default defineComponent({
   background: #eeeeee;
   border-radius: 5px;
   border: none;
+}
+.msgbox-bg {
+  background-image: url("/helper/email.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 </style>

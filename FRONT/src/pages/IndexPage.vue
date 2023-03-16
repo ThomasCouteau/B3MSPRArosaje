@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-ma-md">
+  <q-page class="q-ma-md home-bg">
     <div class="text-h5 text-center">Fil d'actualité</div>
     <div class="column items-center justify-center q-ma-md">
       <div
@@ -209,5 +209,11 @@ export default defineComponent({
   .my-card {
     width: 50vw;
   }
+}
+.home-bg {
+  background-image: url("/helper/gardening.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: space;
 }
 </style>

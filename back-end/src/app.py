@@ -17,7 +17,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://arosaje.ibsolutions.cloud", "http://localhost:8080"],
     allow_credentials=True,
-    allow_methods=["POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"]
 )
 
@@ -616,7 +616,7 @@ def GetTraitement():
 def options():
     response = JSONResponse(content={})
     response.headers["Access-Control-Allow-Origin"] = "https://arosaje.ibsolutions.cloud"
-    response.headers["Access-Control-Allow-Methods"] = ["POST", "OPTIONS"]
+    response.headers["Access-Control-Allow-Methods"] = ["GET", "POST", "OPTIONS"]
     response.headers["Access-Control-Allow-Headers"] = "*"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     return response

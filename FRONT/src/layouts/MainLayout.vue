@@ -1,14 +1,22 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header style="background-color: transparent">
       <q-toolbar class="xs">
-        <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
-        <q-toolbar-title>A'rosa-je</q-toolbar-title>
+        <q-btn
+          class="bg-secondary q-mt-sm"
+          size="lg"
+          flat
+          @click="drawer = !drawer"
+          round
+          dense
+          icon="menu"
+        />
       </q-toolbar>
     </q-header>
     <q-drawer persistent show-if-above bordered v-model="drawer">
       <q-list>
-        <h6 class="text-h6 q-ml-lg" header>A'rosa-je</h6>
+        <!-- <h6 class="text-h6 q-ml-lg" header>A'rosa-je</h6> -->
+        <q-img src="/helper/arosaje.svg" style="width: 270" />
 
         <EssentialLink
           v-for="link in essentialLinks"

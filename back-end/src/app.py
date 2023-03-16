@@ -577,9 +577,15 @@ def GetCGU():
     """
     Récupère les CGU
     :return: 200 Si connecté, CGU récupérées
-    :return: 401 Si mauvais accessToken (ou introuvable)
     """
     return FileResponse("files/CGU.pdf", media_type="application/pdf")
+@app.get("/file/rgpd/")
+def GetTraitement():
+    """
+    Récupère le carnet de traitement
+    :return: 200 Si connecté, Carnet de traitement récupérées
+    """
+    return FileResponse("files/Carnet de traitement.pdf", media_type="application/pdf")
 
 
 # Route pour gérer les requêtes OPTIONS

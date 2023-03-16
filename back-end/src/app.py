@@ -5,6 +5,7 @@ import datetime
 from fastapi import FastAPI, status, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse
 
 from Database import tokenTable, userTable, commentTable, planteTable, conversationTable, privateMessageTable
 from Database.Tables import User, Comment, Plante, Conversation, PrivateMessage, Token, PlanteStatus, UserType, SearchSettings, SearchSettingsUser
@@ -14,7 +15,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://arosaje.ibsolutions.cloud"],
+    allow_origins=["https://arosaje.ibsolutions.cloud", "localhost:8080"],
     allow_credentials=True,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"]
@@ -569,6 +570,16 @@ def DeleteComment(comment: Comment, token: Token):
     return Response(status_code=200)
 ####################
 
+
+##### FILES #####
+@app.get("/file/CGU/")
+def GetCGU():
+    """
+    Récupère les CGU
+    :return: 200 Si connecté, CGU récupérées
+    :return: 401 Si mauvais accessToken (ou introuvable)
+    """
+    return FileResponse("files/CGU.pdf", media_type="application/pdf")
 
 
 # Route pour gérer les requêtes OPTIONS

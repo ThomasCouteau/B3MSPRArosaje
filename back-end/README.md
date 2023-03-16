@@ -683,3 +683,10 @@ POST /commentaire/delete/
 401 Unauthorized (not owner or admin)
 404 Comment not found
 ```
+
+# FILES
+## Récupération du CGU
+### Request
+```json
+GET /files/CGU/
+```

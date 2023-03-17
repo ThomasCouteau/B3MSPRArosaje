@@ -75,44 +75,12 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "ChatMessage",
-  props: {},
-  data() {
-    return {
-      allMessages: [],
-    };
-  },
-  mounted() {
-    const accessToken = localStorage.getItem("accessToken");
-
-    const getAllMessages = async () => {
-      let body = {
-        conversation: {
-          id: this.$route.params.id,
-        },
-
-        token: {
-          accessToken: accessToken,
-        },
-      };
-      body = JSON.stringify(body);
-      const response = await fetch(API_URL + "/conversation/Get/", {
-        method: "POST",
-        body: body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      this.allMessages = await response.json();
-      console.log("messages:", this.allMessages);
-    };
-    getAllMessages();
-  },
   setup() {
     const model = ref({
       message: "",
@@ -122,6 +90,9 @@ export default defineComponent({
     const accessToken = localStorage.getItem("accessToken");
     const route = useRoute();
     const userID = localStorage.getItem("userID");
+    const idConversation = route.params.id;
+
+    let allMessages = ref([]);
 
     let fileToConvert = null;
 
@@ -139,6 +110,29 @@ export default defineComponent({
           reject(error);
         };
       });
+    };
+
+    const getAllMessages = async () => {
+      let body = {
+        conversation: {
+          id: idConversation,
+        },
+
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(API_URL + "/conversation/Get/", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const myJson = await response.json();
+      allMessages.value = myJson;
+      console.log("messages:", allMessages.value);
     };
 
     const addMessage = async () => {
@@ -168,7 +162,19 @@ export default defineComponent({
       console.log("addmessage:", myJson);
       location.reload();
     };
-    return { model, addMessage, userID, convertFileToBase64 };
+
+    onBeforeMount(() => {
+      getAllMessages();
+    });
+
+    return {
+      model,
+      addMessage,
+      userID,
+      convertFileToBase64,
+      allMessages,
+      getAllMessages,
+    };
   },
 });
 </script>

@@ -70,88 +70,11 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onBeforeMount } from "vue";
 import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "MessagesBoxPage",
-  components: {},
-  data() {
-    return {
-      allConversation: [],
-      allBotanistes: [],
-      allGuardians: [],
-    };
-  },
-  mounted() {
-    const accessToken = localStorage.getItem("accessToken");
-
-    const getAllConversationOfUser = async () => {
-      let body = {
-        accessToken: accessToken,
-      };
-      body = JSON.stringify(body);
-      const response = await fetch(API_URL + "/conversation/", {
-        method: "POST",
-        body: body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      this.allConversation = await response.json();
-      console.log("Conv", this.allConversation);
-    };
-
-    const getAllBotanistes = async () => {
-      let body = {
-        search: {
-          isBotaniste: true, //si on veut les botanistes
-          isGardien: false, //si on veut les gardiens
-          isAdministrator: false, //si on veut les administrateurs
-        },
-        token: {
-          accessToken: accessToken,
-        },
-      };
-      body = JSON.stringify(body);
-      const response = await fetch(API_URL + "/user/Search", {
-        method: "POST",
-        body: body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      this.allBotanistes = await response.json();
-      console.log("allbotanistes", this.allBotanistes);
-    };
-
-    const getAllGardiens = async () => {
-      let body = {
-        search: {
-          isBotaniste: false, //si on veut les botanistes
-          isGardien: true, //si on veut les gardiens
-          isAdministrator: false, //si on veut les administrateurs
-        },
-        token: {
-          accessToken: accessToken,
-        },
-      };
-      body = JSON.stringify(body);
-      const response = await fetch(API_URL + "/user/Search", {
-        method: "POST",
-        body: body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      this.allGuardians = await response.json();
-      console.log("allGardiens", this.allGuardians);
-    };
-
-    getAllConversationOfUser();
-    getAllBotanistes();
-    getAllGardiens();
-  },
   setup() {
     const model = ref({
       selectedGardien: null,
@@ -159,6 +82,10 @@ export default defineComponent({
 
     const accessToken = localStorage.getItem("accessToken");
     const userID = localStorage.getItem("userID");
+
+    const allConversation = ref([]);
+    const allBotanistes = ref([]);
+    const allGuardians = ref([]);
 
     const createConversationTo = async () => {
       let body = {
@@ -187,7 +114,83 @@ export default defineComponent({
       console.log(myJson);
       location.reload();
     };
-    return { model, createConversationTo, userID };
+
+    const getAllConversationOfUser = async () => {
+      let body = {
+        accessToken: accessToken,
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(API_URL + "/conversation/", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      allConversation.value = await response.json();
+      console.log("Conv", allConversation.value);
+    };
+
+    const getAllBotanistes = async () => {
+      let body = {
+        search: {
+          isBotaniste: true, //si on veut les botanistes
+          isGardien: false, //si on veut les gardiens
+          isAdministrator: false, //si on veut les administrateurs
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(API_URL + "/user/Search", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      allBotanistes.value = await response.json();
+      console.log("allbotanistes", allBotanistes.value);
+    };
+
+    const getAllGardiens = async () => {
+      let body = {
+        search: {
+          isBotaniste: false, //si on veut les botanistes
+          isGardien: true, //si on veut les gardiens
+          isAdministrator: false, //si on veut les administrateurs
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(API_URL + "/user/Search", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      allGuardians.value = await response.json();
+      console.log("allGardiens", allGuardians.value);
+    };
+
+    onBeforeMount(() => {
+      getAllConversationOfUser();
+      getAllBotanistes();
+      getAllGardiens();
+    });
+
+    return {
+      model,
+      createConversationTo,
+      userID,
+      allConversation,
+      allBotanistes,
+      allGuardians,
+    };
   },
 });
 </script>

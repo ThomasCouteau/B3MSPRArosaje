@@ -121,12 +121,6 @@ import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "ProfilePage",
-  data() {
-    return {
-      allPlanteOfUser: [],
-      keepPlantes: [],
-    };
-  },
   setup() {
     const model = ref({
       pseudo: "",
@@ -136,6 +130,9 @@ export default defineComponent({
     });
     const accessToken = localStorage.getItem("accessToken");
     const userID = localStorage.getItem("userID");
+
+    const allPlanteOfUser = ref([]);
+    const keepPlantes = ref([]);
 
     let tab = ref("my-plants");
 
@@ -158,38 +155,6 @@ export default defineComponent({
       model.value.userTypeID = myJson.userTypeID;
       model.value.picture = myJson.picture;
     };
-
-    const deletePlante = async (planteID) => {
-      let body = {
-        plante: {
-          id: planteID,
-        },
-        token: {
-          accessToken: accessToken,
-        },
-      };
-      body = JSON.stringify(body);
-      const response = await fetch(API_URL + "/plante/delete/", {
-        method: "POST",
-        body: body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      location.reload();
-    };
-
-    onBeforeMount(() => {
-      getCurrentUserDatas();
-      // const base64Image = model.value.picture;
-      // model.value.picture = `data:image/png;base64,${base64Image}`;
-    });
-
-    return { model, deletePlante, userID, API_URL, tab };
-  },
-  mounted() {
-    const userID = localStorage.getItem("userID");
-    const accessToken = localStorage.getItem("accessToken");
 
     const getAllPlanteOfUser = async () => {
       let body = {
@@ -215,8 +180,8 @@ export default defineComponent({
           "Content-Type": "application/json",
         },
       });
-      this.allPlanteOfUser = await response.json();
-      console.log(this.allPlanteOfUser);
+      allPlanteOfUser.value = await response.json();
+      console.log(allPlanteOfUser.value);
     };
 
     const getKeepPlantesOfUser = async () => {
@@ -243,12 +208,45 @@ export default defineComponent({
           "Content-Type": "application/json",
         },
       });
-      this.keepPlantes = await response.json();
-      console.log(this.keepPlantes);
+      keepPlantes.value = await response.json();
+      console.log(keepPlantes.value);
     };
 
-    getAllPlanteOfUser();
-    getKeepPlantesOfUser();
+    const deletePlante = async (planteID) => {
+      let body = {
+        plante: {
+          id: planteID,
+        },
+        token: {
+          accessToken: accessToken,
+        },
+      };
+      body = JSON.stringify(body);
+      const response = await fetch(API_URL + "/plante/delete/", {
+        method: "POST",
+        body: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      location.reload();
+    };
+
+    onBeforeMount(() => {
+      getCurrentUserDatas();
+      getAllPlanteOfUser();
+      getKeepPlantesOfUser();
+    });
+
+    return {
+      model,
+      deletePlante,
+      userID,
+      API_URL,
+      tab,
+      allPlanteOfUser,
+      keepPlantes,
+    };
   },
 });
 </script>

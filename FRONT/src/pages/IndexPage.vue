@@ -88,19 +88,20 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref, onBeforeMount } from "vue";
 import { API_URL } from "../utils/utils.js";
 
 export default defineComponent({
   name: "IndexPage",
-  components: {},
-  data() {
-    return {
-      allKeepPlante: [],
+  setup() {
+    const model = {
+      message: "",
     };
-  },
-  mounted() {
     const accessToken = localStorage.getItem("accessToken");
+    const userTypeID = localStorage.getItem("userTypeID");
+    const userID = localStorage.getItem("userID");
+
+    let allKeepPlante = ref([]);
 
     const getAllKeepPlante = async () => {
       let body = {
@@ -126,19 +127,9 @@ export default defineComponent({
           "Content-Type": "application/json",
         },
       });
-      this.allKeepPlante = await response.json();
-      console.log(this.allKeepPlante);
+      allKeepPlante.value = await response.json();
+      console.log(allKeepPlante.value);
     };
-
-    getAllKeepPlante();
-  },
-  setup() {
-    const model = {
-      message: "",
-    };
-    const accessToken = localStorage.getItem("accessToken");
-    const userTypeID = localStorage.getItem("userTypeID");
-    const userID = localStorage.getItem("userID");
 
     const addCommentToPlante = async (planteID) => {
       let body = {
@@ -185,12 +176,17 @@ export default defineComponent({
       location.reload();
     };
 
+    onBeforeMount(() => {
+      getAllKeepPlante();
+    });
+
     return {
       model,
       addCommentToPlante,
       userTypeID,
       userID,
       deletePlante,
+      allKeepPlante,
     };
   },
 });

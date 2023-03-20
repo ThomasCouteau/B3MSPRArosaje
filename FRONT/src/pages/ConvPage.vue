@@ -2,11 +2,13 @@
   <q-page>
     <ChatMessage />
   </q-page>
+  <LoaderCustom />
 </template>
 
 <script>
 import { defineComponent, onMounted } from "vue";
 import ChatMessage from "src/components/ChatMessage.vue";
+import LoaderCustom from "src/components/LoaderCustom.vue";
 import { useQuasar } from "quasar";
 import { Dialog } from "quasar";
 
@@ -14,6 +16,7 @@ export default defineComponent({
   name: "ConvPage",
   components: {
     ChatMessage,
+    LoaderCustom,
   },
   setup() {
     const $q = useQuasar();

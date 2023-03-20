@@ -113,14 +113,19 @@
       </div>
     </div>
   </q-page>
+  <LoaderCustom />
 </template>
 
 <script>
 import { defineComponent, ref, onBeforeMount, onMounted } from "vue";
 import { API_URL } from "../utils/utils.js";
+import LoaderCustom from "src/components/LoaderCustom.vue";
 
 export default defineComponent({
   name: "ProfilePage",
+  components: {
+    LoaderCustom,
+  },
   setup() {
     const model = ref({
       pseudo: "",

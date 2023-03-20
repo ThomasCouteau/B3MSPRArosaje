@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-ma-md home-bg">
+  <q-page class="q-ma-md">
     <div class="text-h5 text-center">Fil d'actualité</div>
     <div class="column items-center justify-center q-ma-md">
       <div
@@ -85,14 +85,19 @@
       </div>
     </div>
   </q-page>
+  <LoaderCustom />
 </template>
 
 <script>
 import { defineComponent, ref, onBeforeMount } from "vue";
 import { API_URL } from "../utils/utils.js";
+import LoaderCustom from "../components/LoaderCustom.vue";
 
 export default defineComponent({
   name: "IndexPage",
+  components: {
+    LoaderCustom,
+  },
   setup() {
     const model = {
       message: "",
@@ -205,11 +210,5 @@ export default defineComponent({
   .my-card {
     width: 50vw;
   }
-}
-.home-bg {
-  background-image: url("/helper/gardening.svg");
-  background-size: contain;
-  background-position: center;
-  background-repeat: space;
 }
 </style>

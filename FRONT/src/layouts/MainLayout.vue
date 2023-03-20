@@ -15,7 +15,6 @@
     </q-header>
     <q-drawer persistent show-if-above bordered v-model="drawer">
       <q-list>
-        <!-- <h6 class="text-h6 q-ml-lg" header>A'rosa-je</h6> -->
         <q-img src="/helper/arosaje.svg" style="width: 270" />
 
         <EssentialLink

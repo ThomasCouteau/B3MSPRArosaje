@@ -7,15 +7,17 @@
       </div>
     </div>
   </q-page>
+  <LoaderCustom />
 </template>
 
 <script>
 import { defineComponent } from "vue";
 import SearchPlantMap from "components/SearchPlantMap.vue";
+import LoaderCustom from "src/components/LoaderCustom.vue";
 
 export default defineComponent({
   name: "MapPage",
-  components: { SearchPlantMap },
+  components: { SearchPlantMap, LoaderCustom },
 });
 </script>
 

@@ -19,11 +19,14 @@ export default defineComponent({
 
     const getPositionOfUser = async () => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          userPosition = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
+        userPosition = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition((position) => {
+            let userPos = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            };
+            resolve(userPos);
+          });
         });
       } else {
         console.log("geolocalisation not supported");
@@ -109,7 +112,6 @@ export default defineComponent({
     };
 
     onBeforeMount(() => {
-      getPositionOfUser();
       initializeMapAndLocator();
     });
 

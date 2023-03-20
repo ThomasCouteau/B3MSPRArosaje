@@ -67,14 +67,19 @@
       </div>
     </div>
   </q-page>
+  <LoaderCustom />
 </template>
 
 <script>
 import { defineComponent, ref, onBeforeMount } from "vue";
 import { API_URL } from "../utils/utils.js";
+import LoaderCustom from "src/components/LoaderCustom.vue";
 
 export default defineComponent({
   name: "MessagesBoxPage",
+  components: {
+    LoaderCustom,
+  },
   setup() {
     const model = ref({
       selectedGardien: null,

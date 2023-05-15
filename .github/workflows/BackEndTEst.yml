@@ -3,7 +3,7 @@ name: Mon action
 on:
   push:
     branches:
-      - main
+      - back-end
 
 jobs:
   build:

@@ -1,0 +1,20 @@
+name: Mon action
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code source
+        uses: actions/checkout@v2
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Construire le projet
+        run: npm run build

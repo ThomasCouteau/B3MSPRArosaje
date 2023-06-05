@@ -1,17 +1,12 @@
 # B3MSPRArosaje
 
 # AUTHENTIFICATION
-
 ## Creation utilisateur
-
 ### Request
-
 ```
 POST /user/register
 ```
-
 ### Body
-
 ```json
 {
     "userTypeID": int{1=Botaniste, 2=Admin, 3=Gardien},
@@ -19,61 +14,52 @@ POST /user/register
     "password": str
 }
 ```
-
 ### Response
-
 ```json
 201 Created
 409 Pseudo already exists
 ```
 
 ## Connexion utilisateur
-
 ### Request
-
 ```
 POST /user/login
 ```
-
 ### Body
-
 ```json
 {
     "pseudo": str,
     "password": str
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 {
+    "userID": {
+        "id": int,
+        "userTypeID": int{1=Botaniste, 2=Admin, 3=Gardien}
+    },
     "accessToken": str,
     "refreshToken": str
 }
 
-401 Unauthorized
+401 Unauthorized (mauvais pseudo)
+402 Unauthorized (mauvais mot de passe)
 ```
 
 ## Regénération du token d'accès
-
 ### Request
-
 ```
 POST /user/refreshToken
 ```
-
 ### Body
-
 ```json
 {
     "refreshToken": str
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 {
@@ -85,45 +71,33 @@ POST /user/refreshToken
 ```
 
 ## Déconnexion utilisateur
-
 ### Request
-
 ```
 POST /user/logout
 ```
-
 ### Body
-
 ```json
 {
     "userID": int
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 ```
 
 ## Récupération des données d'un utilisateur
-
 ### Request
-
 ```json
 POST /user/{userID}
 ```
-
 ### Body
-
 ```json
 {
     "accessToken": str
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 {
@@ -137,15 +111,11 @@ POST /user/{userID}
 ```
 
 ## Recherche d'utilisateurs
-
 ### Request
-
 ```
 POST /user/Search
 ```
-
 ### Body
-
 ```json
 {
     "search":  {
@@ -160,9 +130,7 @@ POST /user/Search
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 
@@ -182,15 +150,11 @@ POST /user/Search
 ```
 
 ## Suppression d'un utilisateur
-
 ### Request
-
 ```json
 POST /user/delete/
 ```
-
 ### Body
-
 ```json
 {
     "user": {
@@ -201,9 +165,7 @@ POST /user/delete/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK (admin or user himself)
 404 User not found
@@ -211,23 +173,17 @@ POST /user/delete/
 ```
 
 ## Récupération de l'utilisateur connecté
-
 ### Request
-
 ```json
 POST /user/me
 ```
-
 ### Body
-
 ```json
 {
     "accessToken": str
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 {
@@ -239,33 +195,28 @@ POST /user/me
 401 Unauthorized
 ```
 
+
 # PLANTES
-
 ## Ajout d'une plante
-
 ### Request
-
 ```json
 POST /plant/add
 ```
-
 ### Body
-
 ```json
 {
   "plante": {
     "name": str,
     "latitude": float,
-    "longitude": float
+    "longitude": float,
+    "picture": "string"
   },
   "token": {
     "accessToken": str
   }
 }
 ```
-
 ### Response
-
 ```json
 201 Created
 {
@@ -277,15 +228,11 @@ POST /plant/add
 ```
 
 ## Récupération de toute les plantes
-
 ### Request
-
 ```json
 POST /plante/search
 ```
-
 ### Body
-
 ```json
 {
     "searchSetting":{
@@ -303,9 +250,7 @@ POST /plante/search
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 [
@@ -335,15 +280,11 @@ POST /plante/search
 ```
 
 ## Récupération des données d'une plante
-
 ### Request
-
 ```json
 POST /plante/
 ```
-
 ### Body
-
 ```json
 {
     "plante": {
@@ -354,9 +295,7 @@ POST /plante/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 {
@@ -372,15 +311,11 @@ POST /plante/
 ```
 
 ## Supprimer une plante
-
 ### Request
-
 ```json
 POST /plante/delete/
 ```
-
 ### Body
-
 ```json
 {
     "plante": {
@@ -391,9 +326,7 @@ POST /plante/delete/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 
@@ -402,15 +335,11 @@ POST /plante/delete/
 ```
 
 ## Mettre à jours le statut d'une plante
-
 ### Request
-
 ```json
 POST /plante/updateStatus/
 ```
-
 ### Body
-
 ```json
 {
     "plante":{
@@ -422,9 +351,7 @@ POST /plante/updateStatus/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 
@@ -433,15 +360,11 @@ POST /plante/updateStatus/
 ```
 
 ## Mettre à jours le gardien d'une plante
-
 ### Request
-
 ```json
 POST /plante/updateGuardian/
 ```
-
 ### Body
-
 ```json
 {
     "plante":{
@@ -455,9 +378,7 @@ POST /plante/updateGuardian/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 
@@ -465,18 +386,16 @@ POST /plante/updateGuardian/
 404 Plant not found
 ```
 
+
+
+
 # CONVERSATIONS
-
 ## Récupération des conversations d'un utilisateur
-
 ### Request
-
 ```json
 POST /conversation/
 ```
-
 ### Body
-
 ```json
 {
     "token": {
@@ -484,9 +403,7 @@ POST /conversation/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 [
@@ -514,15 +431,11 @@ POST /conversation/
 ```
 
 ## Création d'une conversation
-
 ### Request
-
 ```json
 POST /conversation/add
 ```
-
 ### Body
-
 ```json
 {
     "conversation": {
@@ -538,9 +451,7 @@ POST /conversation/add
     }
 }
 ```
-
 ### Response
-
 ```json
 201 Created
 {
@@ -554,15 +465,11 @@ POST /conversation/add
 ```
 
 ## Récupération les IDs des messages d'une conversation
-
 ### Request
-
 ```json
 POST /conversation/Get/
 ```
-
 ### Body
-
 ```json
 {
     "conversation": {
@@ -573,9 +480,7 @@ POST /conversation/Get/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 [
@@ -617,15 +522,11 @@ POST /conversation/Get/
 ```
 
 ## Récupération du contenu d'un message
-
 ### Request
-
 ```json
 POST /conversation/GetMessage/
 ```
-
 ### Body
-
 ```json
 {
     "message": {
@@ -636,9 +537,7 @@ POST /conversation/GetMessage/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 {
@@ -671,29 +570,23 @@ POST /conversation/GetMessage/
 ```
 
 ## Envoyer un message
-
 ### Request
-
 ```json
 POST /conversation/{conversationID}/add/
 ```
-
 ### Body
-
 ```json
 {
     "message": {
         "message": str,
-        "image": str (base64)
+        "picture": str (base64)
     },
     "token": {
         "accessToken": str
     }
 }
 ```
-
 ### Response
-
 ```json
 201 Created
 {
@@ -706,17 +599,12 @@ POST /conversation/{conversationID}/add/
 ```
 
 # COMMENTAIRES
-
 ## Récupération des commentaires d'une plante
-
 ### Request
-
 ```json
 POST /commentaire/
 ```
-
 ### Body
-
 ```json
 {
     "planteID":int ,
@@ -725,9 +613,7 @@ POST /commentaire/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 [
@@ -750,15 +636,11 @@ POST /commentaire/
 ```
 
 ## Ajouter un commentaire
-
 ### Request
-
 ```json
 POST /commentaire/{planteID}/add/
 ```
-
 ### Body
-
 ```json
 200 OK
 {
@@ -770,9 +652,7 @@ POST /commentaire/{planteID}/add/
     }
 }
 ```
-
 ### Response
-
 ```json
 201 Created
 {
@@ -781,15 +661,11 @@ POST /commentaire/{planteID}/add/
 ```
 
 ## Supprimer un commentaire
-
 ### Request
-
 ```json
 POST /commentaire/delete/
 ```
-
 ### Body
-
 ```json
 {
     "comment":{
@@ -800,12 +676,17 @@ POST /commentaire/delete/
     }
 }
 ```
-
 ### Response
-
 ```json
 200 OK
 
 401 Unauthorized (not owner or admin)
 404 Comment not found
+```
+
+# FILES
+## Récupération du CGU
+### Request
+```json
+GET /files/CGU/
 ```

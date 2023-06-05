@@ -1,20 +1,24 @@
 import json
 from passlib.hash import sha256_crypt
-from Database import *
 import uvicorn
-
+import datetime
 from fastapi import FastAPI, status, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse
+
+from Database import tokenTable, userTable, commentTable, planteTable, conversationTable, privateMessageTable
+from Database.Tables import User, Comment, Plante, Conversation, PrivateMessage, Token, PlanteStatus, UserType, SearchSettings, SearchSettingsUser
 
 app = FastAPI()
-db: Database = Database("ARosaJe_Data.db")
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://arosaje.ibsolutions.cloud", "http://localhost:8080"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"]
 )
 
 
@@ -28,25 +32,32 @@ def Register(newUser: User):
     :return: 201 si ajouté
     :return: 409 si le pseudo déjà présent
     """
-    if(db.UserGetByPseudo(newUser.pseudo) != None):
+    newUser.pseudo = newUser.pseudo.strip()
+    newUser.password = newUser.password.strip()
+    if(userTable.GetByPseudo(newUser.pseudo) != None):
         return Response(status_code=409)
     newUser.password = sha256_crypt.encrypt(newUser.password)
-    db.UserAdd(newUser)
+    userTable.Add(newUser)
     return Response(status_code=201)
 
 @app.post("/user/login", response_model=Token)
-def Login(user: User):
+def Login(loginUser: User):
     """
     Connecte un utilisateur
     :param user: Utilisateur à connecter
     :return: 200 si connecté, {accessToken: "accessToken", refreshToken: "refreshToken"}
-    :return: 401 si mauvais pseudo ou mot de passe
+    :return: 401 si mauvais pseudo 
+    :return: 402 mot de passe
     """
-    if(db.UserGetByPseudo(user.pseudo) == None):                                            # Si le pseudo n'existe pas
+    loginUser.pseudo = loginUser.pseudo.strip()
+    loginUser.password = loginUser.password.strip()
+    user = userTable.GetByPseudo(loginUser.pseudo)
+    if(user == None):                                            # Si le pseudo n'existe pas
         return Response(status_code=401)
-    if(not sha256_crypt.verify(user.password, db.UserGetByPseudo(user.pseudo).password)):   # Si le mot de passe est incorrect
-        return Response(status_code=401)
-    newToken: Token = db.TokenGenerate(db.UserGetByPseudo(user.pseudo))
+    if(not sha256_crypt.verify(loginUser.password, user.password)):   # Si le mot de passe est incorrect
+        return Response(status_code=402)
+    newToken: Token = tokenTable.Generate(user)
+    newToken.userTypeID = user.userTypeID
     return newToken
 
 @app.post("/user/refreshToken", response_model=Token)
@@ -59,13 +70,13 @@ def RefreshToken(token: Token):
     """
     if(token.refreshToken == None):
         return Response(status_code=401)
-    if(db.TokenGetByRefreshToken(token.refreshToken) == None):
+    if(tokenTable.GetByRefreshToken(token.refreshToken) == None):
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    token: Token = db.TokenRefresh(db.TokenGetByRefreshToken(token.refreshToken))
+    token: Token = tokenTable.Refresh(tokenTable.GetByRefreshToken(token.refreshToken))
     return token
     
 @app.post("/user/logout")
@@ -75,7 +86,7 @@ def Logout(userID: dict):
     :param user: Utilisateur à déconnecter
     :return: 200 si déconnecté
     """
-    db.TokenDelete(db.UserGetByID(userID["userID"]))
+    tokenTable.Delete(userTable.GetByID(userID["userID"]))
     return Response(status_code=200)
 
 @app.post("/user/get/{userID}", response_model=User)
@@ -89,13 +100,13 @@ def GetUser(userID: int, token: Token):
     """
     if(token.accessToken == None):
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    user: User = db.UserGetByID(userID)
+    user: User = userTable.GetByID(userID)
     if(user == None):
         return Response(status_code=404)
     del user.password
@@ -113,21 +124,21 @@ def DeleteUser(user: User, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token == None):                                              # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
+    requestUser: User = userTable.GetByID(token.userID)                # Utilisateur qui fait la requête
     if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == user.id)):# Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur à supprimer
         return Response(status_code=401)
 
-    user: User = db.UserGetByID(user.id)                             # Utilisateur à supprimer
+    user: User = userTable.GetByID(user.id)                             # Utilisateur à supprimer
     if(user == None):                                               # Si l'utilisateur n'existe pas
         return Response(status_code=404)
-    db.UserDelete(user)
+    userTable.Delete(user)
     return Response(status_code=200)
 
 @app.post("/user/me", response_model=User)
@@ -140,13 +151,13 @@ def CurrentUser(token: Token):
     """
     if(token.accessToken == None):
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    user: User = db.UserGetByID(token.userID)
+    user: User = userTable.GetByID(token.userID)
     del user.password
     del user.token
     return user
@@ -161,13 +172,13 @@ def SearchUser(search: SearchSettingsUser, token: Token):
     """
     if(token.accessToken == None):
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    users: list[User] = db.UserSearch(search)
+    users: list[User] = userTable.Search(search)
     for user in users:
         del user.password
         del user.token
@@ -188,19 +199,19 @@ def AddPlante(plante: Plante, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
 
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    requestUser: User = db.UserGetByID(token.userID) # Utilisateur qui fait la requête
+    requestUser: User = userTable.GetByID(token.userID) # Utilisateur qui fait la requête
     if(requestUser == None):                                        # Si l'utilisateur n'existe pas
         return Response(status_code=404)
 
     plante.owner = requestUser
-    planteID: int = db.PlanteAdd(plante)
+    planteID: int = planteTable.Add(plante)
 
     returnData: dict = {"planteID": planteID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
@@ -214,12 +225,12 @@ def GetPlanteAll(searchSetting: SearchSettings, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
-    plantes: list[Plante] = db.PlanteSearchAll(searchSetting)
+    plantes: list[Plante] = planteTable.SearchAll(searchSetting)
     return plantes
 
 @app.post("/plante/", response_model=Plante)
@@ -233,13 +244,13 @@ def GetPlanteByID(plante: Plante, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(plante.id)
+    plante: Plante = planteTable.GetByID(plante.id)
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
     return plante
@@ -255,22 +266,22 @@ def DeletePlante(plante: Plante, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token == None):                                              # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(plante.id)                     # Plante à supprimer
+    plante: Plante = planteTable.GetByID(plante.id)                     # Plante à supprimer
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
 
-    requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
+    requestUser: User = userTable.GetByID(token.userID)                # Utilisateur qui fait la requête
     if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == plante.owner.id)):# Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur à supprimer
         return Response(status_code=401)
 
-    db.PlanteDelete(plante)
+    planteTable.Delete(plante)
     return Response(status_code=200)
 
 @app.post("/plante/updateStatus/")
@@ -284,21 +295,21 @@ def UpdatePlanteStatus(plante: Plante, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    planteToUpdate: Plante = db.PlanteGetByID(plante.id)            # Plante à mettre à jour
+    planteToUpdate: Plante = planteTable.GetByID(plante.id)            # Plante à mettre à jour
     if(planteToUpdate == None):                                     # Si la plante n'existe pas
         return Response(status_code=404)
-    requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
-    if(not(requestUser.userTypeID == UserType.ADMIN) and not(requestUser.id == planteToUpdate.owner.id) and not(requestUser.id == planteToUpdate.guardian.id)):
+    requestUser: User = userTable.GetByID(token.userID)                # Utilisateur qui fait la requête
+    if(requestUser.userTypeID != UserType.ADMIN and requestUser.id != planteToUpdate.owner.id and requestUser.id != planteToUpdate.guardian.id):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas administrateur ET n'est pas l'utilisateur de la plante
 
     planteToUpdate.status = plante.status
-    db.PlanteUpdate(planteToUpdate)
+    planteTable.Update(planteToUpdate)
     return Response(status_code=200)
 
 @app.post("/plante/updateGuardian/")
@@ -312,16 +323,16 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    planteToUpdate: Plante = db.PlanteGetByID(plante.id)            # Plante à mettre à jour
+    planteToUpdate: Plante = planteTable.GetByID(plante.id)            # Plante à mettre à jour
     if(planteToUpdate == None):                                     # Si la plante n'existe pas
         return Response(status_code=404)
-    requestUser: User = db.UserGetByID(token.userID)                # Utilisateur qui fait la requête
+    requestUser: User = userTable.GetByID(token.userID)                # Utilisateur qui fait la requête
     if(requestUser.userTypeID != UserType.GARDIEN and requestUser.userTypeID != UserType.ADMIN):        # Si l'utilisateur est ni gardien ni administrateur
         return Response(status_code=401)
     if(requestUser.userTypeID == UserType.GARDIEN and planteToUpdate.guardian != None and not(requestUser.id == planteToUpdate.owner.id)):# Si l'utilisateur est gardien ET que la plante est déjà gardé ET que l'utilisateur n'est pas le propriétaire de la plante
@@ -329,7 +340,7 @@ def UpdatePlanteGuardian(plante: Plante, token: Token):
     
 
     planteToUpdate.guardian = plante.guardian
-    db.PlanteUpdate(planteToUpdate)
+    planteTable.Update(planteToUpdate)
     return Response(status_code=200)
 ##################
 
@@ -345,13 +356,13 @@ def GetConversations(token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    conversations: list[Conversation] = db.ConversationGetByUserID(token.userID)
+    conversations: list[Conversation] = conversationTable.GetByUserID(token.userID)
     return conversations
 @app.post("/conversation/Get/", response_model=list[PrivateMessage])
 def GetConversationMessagesID(conversation: Conversation, token: Token):
@@ -364,23 +375,23 @@ def GetConversationMessagesID(conversation: Conversation, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    conversation: Conversation = db.ConversationGetByID(conversation.id)
+    conversation: Conversation = conversationTable.GetByID(conversation.id)
     if(conversation == None):                                       # Si la conversation n'existe pas
         return Response(status_code=404)
     if not(conversation.owner.id == token.userID or conversation.guardian.id == token.userID):
         return Response(status_code=401)                            # Si l'utilisateur n'est pas dans la conversation
 
 
-    messagesID: list[int] = db.MessageIDsGetByConversationID(conversation.id)
+    messagesID: list[int] = privateMessageTable.MessageIDsGetByConversationID(conversation.id)
     messages: list[PrivateMessage] = []
     for messageID in messagesID:
-        messages.append(db.MessageGetByID(messageID))
+        messages.append(privateMessageTable.GetByID(messageID))
     return messages
 @app.post("/conversation/GetMessage/", response_model=PrivateMessage)
 def GetConversationMessage(message: PrivateMessage, token: Token):
@@ -393,13 +404,13 @@ def GetConversationMessage(message: PrivateMessage, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    message: PrivateMessage = db.MessageGetByID(message.id)
+    message: PrivateMessage = privateMessageTable.GetByID(message.id)
     if(message == None):                                            # Si le message n'existe pas
         return Response(status_code=404)
     if not(message.conversation.owner.id == token.userID or message.conversation.guardian.id == token.userID):
@@ -425,19 +436,19 @@ def AddConversation(conversation: Conversation, token: Token):
 
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    if(db.UserGetByID(conversation.owner.id) == None or db.UserGetByID(conversation.guardian.id) == None):
+    if(userTable.GetByID(conversation.owner.id) == None or userTable.GetByID(conversation.guardian.id) == None):
         return Response(status_code=404)
 
-    if(db.ConversationGetByUsersID(conversation.owner.id, conversation.guardian.id) != None):
+    if(conversationTable.GetByUsersID(conversation.owner.id, conversation.guardian.id) != None):
         return Response(status_code=409)
 
-    conversationID: int = db.ConversationAdd(conversation)
+    conversationID: int = conversationTable.Add(conversation)
     returnData: dict = {"conversationID": conversationID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
 @app.post("/conversation/{conversationID}/add/")
@@ -456,13 +467,13 @@ def AddConversationMessage(conversationID: int, message: PrivateMessage, token: 
 
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    conversation: Conversation = db.ConversationGetByID(conversationID)
+    conversation: Conversation = conversationTable.GetByID(conversationID)
     if(conversation == None):                                       # Si la conversation n'existe pas
         return Response(status_code=404)
     if not(conversation.owner.id == token.userID or conversation.guardian.id == token.userID):
@@ -470,8 +481,8 @@ def AddConversationMessage(conversationID: int, message: PrivateMessage, token: 
 
 
     message.conversation = conversation
-    message.sender = db.UserGetByID(token.userID)
-    messageID: int = db.MessageAdd(message)
+    message.sender = userTable.GetByID(token.userID)
+    messageID: int = privateMessageTable.Add(message)
     returnData: dict = {"messageID": messageID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
 ########################
@@ -487,17 +498,17 @@ def GetComments(plante: Plante, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(plante.id)
+    plante: Plante = planteTable.GetByID(plante.id)
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
 
-    comments: list[Comment] = db.CommentGetByPlanteID(plante.id)
+    comments: list[Comment] = commentTable.GetByPlanteID(plante.id)
     return comments
 
 @app.post("/commentaire/{planteID}/add/")
@@ -516,19 +527,19 @@ def AddComment(planteID: int, comment: Comment, token: Token):
 
     if(token== None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    plante: Plante = db.PlanteGetByID(planteID)
+    plante: Plante = planteTable.GetByID(planteID)
     if(plante == None):                                             # Si la plante n'existe pas
         return Response(status_code=404)
 
-    comment.plante = plante
-    comment.author = db.UserGetByID(token.userID)
-    commentID: int = db.CommentAdd(comment)
+    comment.planteID = planteID
+    comment.author = userTable.GetByID(token.userID)
+    commentID: int = commentTable.Add(comment)
     returnData: dict = {"commentID": commentID}
     return Response(status_code=201, content=json.dumps(returnData), media_type="application/json")
 
@@ -542,22 +553,74 @@ def DeleteComment(comment: Comment, token: Token):
     """
     if(token.accessToken == None):                                  # Si l'accessToken n'est pas présent
         return Response(status_code=401)
-    if(db.TokenGetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
+    if(tokenTable.GetByAccessToken(token.accessToken) == None):        # Si l'accessToken n'existe pas
         return Response(status_code=401)
-    token: Token = db.TokenGetByAccessToken(token.accessToken)
+    token: Token = tokenTable.GetByAccessToken(token.accessToken)
     if(token.expire < datetime.datetime.now()):                     # Si l'accessToken est expiré
         return Response(status_code=401)
 
-    comment: Comment = db.CommentGetByID(comment.id)
+    comment: Comment = commentTable.GetByID(comment.id)
     if(comment == None):                                            # Si le commentaire n'existe pas
         return Response(status_code=404)
 
     if not(comment.author.id == token.userID):                      # Si l'utilisateur n'est pas l'auteur du commentaire
         return Response(status_code=401)
 
-    db.CommentDelete(comment.id)
+    commentTable.Delete(comment.id)
     return Response(status_code=200)
 ####################
 
+
+##### FILES #####
+@app.get("/file/CGU/")
+def GetCGU():
+    """
+    Récupère les CGU
+    :return: 200 Si connecté, CGU récupérées
+    """
+    return FileResponse("files/CGU.pdf", media_type="application/pdf")
+@app.get("/file/rgpd/")
+def GetTraitement():
+    """
+    Récupère le carnet de traitement
+    :return: 200 Si connecté, Carnet de traitement récupérées
+    """
+    return FileResponse("files/Carnet de traitement.pdf", media_type="application/pdf")
+
+
+# Route pour gérer les requêtes OPTIONS
+@app.options("/user/register")
+@app.options("/user/login")
+@app.options("/user/refreshToken")
+@app.options("/user/logout")
+@app.options("/user/get/{userID}")
+@app.options("/user/delete/")
+@app.options("/user/me")
+@app.options("/user/Search")
+@app.options("/plante/add")
+@app.options("/plante/search")
+@app.options("/plante/")
+@app.options("/plante/delete/")
+@app.options("/plante/updateStatus/")
+@app.options("/plante/updateGuardian/")
+@app.options("/conversation/")
+@app.options("/conversation/Get/")
+@app.options("/conversation/GetMessage/")
+@app.options("/conversation/add/")
+@app.options("/conversation/{conversationID}/add/")
+@app.options("/commentaire/")
+@app.options("/commentaire/{planteID}/add/")
+@app.options("/commentaire/delete/")
+@app.options("/file/CGU/")
+@app.options("/file/rgpd/")
+def options():
+    response = JSONResponse(content={})
+    response.headers["Access-Control-Allow-Origin"] = "https://arosaje.ibsolutions.cloud"
+    response.headers["Access-Control-Allow-Methods"] = ["GET", "POST", "OPTIONS"]
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
+
+
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1')
+    uvicorn.run(app, host='0.0.0.0', port=1418)

@@ -1,9 +1,12 @@
-name: Mon action
+name: Python Tests
 
 on:
   push:
     branches:
-      - back-end
+      - dev
+  pull_request:
+    branches:
+      - dev 
 
 jobs:
   build:
@@ -13,8 +16,19 @@ jobs:
       - name: Checkout du code source
         uses: actions/checkout@v2
 
-      - name: Installer les dépendances
-        run: npm install
+      - name: Vérifier l'installation de Python
+        run: python --version
 
-      - name: Construire le projet
-        run: npm run build
+      - name: Installer Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Vérifier la nouvelle installation de Python
+        run: python --version
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Exécuter les tests avec pytest
+        run: python -m pytest

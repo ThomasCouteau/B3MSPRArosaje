@@ -1,5 +1,5 @@
 <template>
-  <q-item class="q-ma-md" :href="link">
+  <q-item class="q-ma-md" :href="link" :name="title">
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>

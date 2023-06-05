@@ -50,6 +50,7 @@
               }}</q-item-label>
             </q-item-section>
             <q-btn
+              name="threePoints"
               color="grey-7"
               round
               flat
@@ -59,7 +60,9 @@
               <q-menu cover auto-close>
                 <q-list>
                   <q-item clickable @click="deletePlante(planteUser.id)">
-                    <q-item-section>Supprimer la plante</q-item-section>
+                    <q-item-section name="deletePost"
+                      >Supprimer la plante</q-item-section
+                    >
                   </q-item>
                 </q-list>
               </q-menu>

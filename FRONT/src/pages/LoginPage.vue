@@ -13,6 +13,7 @@
             <q-input
               v-model="model.pseudo"
               label="Login"
+              name="Login"
               filled
               :rules="[
                 (val) =>
@@ -22,6 +23,7 @@
             <q-input
               v-model="model.password"
               label="Mot de passe"
+              name="password"
               filled
               type="password"
               :rules="[

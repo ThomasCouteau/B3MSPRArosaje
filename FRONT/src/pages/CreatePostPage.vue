@@ -7,6 +7,7 @@
         clearable
         filled
         v-model="model.name"
+        name="name"
         label="Nom de la plante"
         class="q-ma-md my-input"
       />
@@ -24,6 +25,7 @@
         class="q-ma-md"
         color="secondary"
         label="Créer"
+        name="createPost"
         @click="createPost"
       />
     </div>

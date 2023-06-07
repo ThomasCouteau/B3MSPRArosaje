@@ -11,7 +11,8 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "start": "quasar build",
-    "cypress:open": "cypress open"
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run --headless --spec 'cypress/e2e/auth.cy.js'"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

@@ -85,19 +85,16 @@
       </div>
     </div>
   </q-page>
-  <LoaderCustom />
 </template>
 
 <script>
 import { defineComponent, ref, onBeforeMount } from "vue";
 import { API_URL } from "../utils/utils.js";
-import LoaderCustom from "../components/LoaderCustom.vue";
+import { useQuasar, QSpinnerIos } from "quasar";
 
 export default defineComponent({
   name: "IndexPage",
-  components: {
-    LoaderCustom,
-  },
+
   setup() {
     const model = {
       message: "",
@@ -181,9 +178,28 @@ export default defineComponent({
       location.reload();
     };
 
-    onBeforeMount(() => {
-      getAllKeepPlante();
+    onBeforeMount(async () => {
+      await getAllKeepPlante();
     });
+
+    const $q = useQuasar();
+    const loadDatas = async (myFunction) => {
+      $q.loading.show({
+        spinner: QSpinnerIos,
+        spinnerSize: 140,
+        spinnerColor: "primary",
+        backgroundColor: "black",
+      });
+      try {
+        await Promise.all([await myFunction]);
+        console.log("Data loaded successfully");
+      } catch (error) {
+        console.error(error);
+        console.log("Data loading failed");
+      } finally {
+        $q.loading.hide();
+      }
+    };
 
     return {
       model,
@@ -192,6 +208,7 @@ export default defineComponent({
       userID,
       deletePlante,
       allKeepPlante,
+      loadDatas,
     };
   },
 });

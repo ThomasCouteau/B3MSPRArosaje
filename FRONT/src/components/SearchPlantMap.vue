@@ -9,6 +9,7 @@ import { defineComponent, onMounted, onBeforeMount } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { API_URL } from "../utils/utils.js";
+import { useQuasar, QSpinnerIos } from "quasar";
 
 export default defineComponent({
   name: "SearchPlantMap",
@@ -62,7 +63,7 @@ export default defineComponent({
     };
 
     const initializeMapAndLocator = async () => {
-      await getAllAvailablePlante();
+      await loadDatas(getAllAvailablePlante());
       await getPositionOfUser();
       console.log(userPosition);
       var map = L.map("map").setView(
@@ -91,6 +92,8 @@ export default defineComponent({
             allAvailablePlante[index].name +
               "<br><a href='/post/" +
               allAvailablePlante[index].id +
+              "' name='" +
+              allAvailablePlante[index].name +
               "'>Voir</a>"
           );
       }
@@ -111,8 +114,27 @@ export default defineComponent({
       ).addTo(map);
     };
 
-    onBeforeMount(() => {
-      initializeMapAndLocator();
+    const $q = useQuasar();
+    const loadDatas = async (myFunction) => {
+      $q.loading.show({
+        spinner: QSpinnerIos,
+        spinnerSize: 140,
+        spinnerColor: "primary",
+        backgroundColor: "black",
+      });
+      try {
+        await Promise.all([await myFunction]);
+        console.log("Data loaded successfully");
+      } catch (error) {
+        console.error(error);
+        console.log("Data loading failed");
+      } finally {
+        $q.loading.hide();
+      }
+    };
+
+    onBeforeMount(async () => {
+      await initializeMapAndLocator();
     });
 
     return {
